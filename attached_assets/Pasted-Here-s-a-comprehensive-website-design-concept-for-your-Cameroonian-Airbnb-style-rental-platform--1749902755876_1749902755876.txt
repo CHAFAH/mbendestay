@@ -1,0 +1,166 @@
+Here's a **comprehensive website design concept** for your Cameroonian Airbnb-style rental platform. This includes layout ideas, page structure, user flow, and key features. The platform is tailored for Cameroon, with specific filters for **regions, divisions, property types, price, and room details**, and includes a flow for **landlords to register and manage listings**.
+
+---
+
+## 🌍 **Platform Name**: *MbendeStay* (or a name of your choice)
+
+---
+
+## 🔝 **Homepage**
+
+### Hero Section
+
+* **Search bar** with filters:
+
+  * Region (10 regions of Cameroon)
+  * Division (Auto-populated based on selected Region)
+  * Property Type: Guest House | Apartment | Room
+  * Price range
+  * Room size (# rooms, size in m²)
+  * Availability dates
+* **Background image**: rotating slideshow of beautiful rental homes across Cameroon
+* **Call to Action**: "Find your perfect stay in Cameroon" + search button
+
+---
+
+## 🗂️ **Browse Listings Page**
+
+### Filter Sidebar
+
+* **Region** (Dropdown: all 10 regions)
+* **Division** (Dynamic dropdown)
+* **Property Type** (Checkboxes)
+* **Contract Type** (Short stay, Long stay, Daily, Monthly)
+* **Rooms** (1-5+)
+* **Size** (Range slider in m²)
+* **Price** (Range slider in XAF)
+* **Amenities** (Wi-Fi, Kitchen, Parking, A/C, Pet friendly, etc.)
+
+### Listings Grid
+
+* Thumbnail (First image)
+* Property Type badge (e.g., "Apartment")
+* Location (Region + Division)
+* Price per night/month
+* Short description
+* Ratings and reviews (optional)
+* “View Details” button
+
+---
+
+## 🏠 **Property Detail Page**
+
+* Image carousel (up to 10 images + 1 embedded video)
+* **Detailed description**
+
+  * Room details (number, size, furnishing, etc.)
+  * Amenities
+  * Contract type
+  * Rules and restrictions
+  * Cancellation policy
+* **Landlord Contact Info**
+
+  * Email
+  * Phone number (WhatsApp optional)
+* **Location map**
+* “Contact Landlord” button (opens a contact form)
+* **Book Now** or “Request Stay” button
+
+---
+
+## 🧑‍💼 **Landlord Dashboard**
+
+### Access
+
+* "List Your Property" button on homepage header
+* Login/Register option in the navigation
+
+### Landlord Registration
+
+* Full name
+* Email
+* Phone number
+* National ID upload (Front + Back, max 2MB each)
+* Subscription selection:
+
+  * Monthly: 10,000 XAF
+  * Yearly: 80,000 XAF
+* Payment options: Mobile Money (MTN, Orange), Bank transfer
+* After payment, dashboard access is granted
+
+### Dashboard Features
+
+* **Upload Listing**
+
+  * Title
+  * Property Type
+  * Region & Division
+  * Room info
+  * Description
+  * Amenities
+  * Price & contract type
+  * Upload max 10 images and 1 video
+* **Manage Listings**
+
+  * Edit / Delete
+  * View stats (clicks, interest)
+* **Profile Management**
+
+  * Update ID if expired
+  * Update contact info
+* **Payments Section**
+
+  * Payment history
+  * Subscription renewal
+
+---
+
+## 📞 **Contact Page**
+
+### General Contact Form
+
+* Name
+* Email
+* Topic (Booking Inquiry, Partnership, Technical Issue, etc.)
+* Message box
+
+### Landlord Contact Form
+
+* For non-logged-in users wanting to reach out
+* Landlords also receive notifications in dashboard
+
+---
+
+## 📱 **Mobile Design**
+
+* Simplified search and filters (accordion-style)
+* One-click call or WhatsApp from property detail page
+* Landlord dashboard optimized for mobile upload
+
+---
+
+## 🧭 **Navigation Bar**
+
+* Home
+* Browse Properties
+* List Your Property
+* About
+* Contact Us
+* Login / Register
+
+---
+
+## 📝 **Footer**
+
+* Links to:
+
+  * Terms & Conditions
+  * Privacy Policy
+  * FAQs
+  * Social Media (FB, IG, TikTok)
+* Payment methods accepted
+* Copyright
+
+---
+
+Would you like a visual wireframe of this design (as a mockup)? I can generate that too.
