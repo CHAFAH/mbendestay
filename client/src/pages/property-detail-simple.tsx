@@ -1,19 +1,47 @@
-import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function PropertyDetailSimple() {
   const params = useParams();
   const propertyId = parseInt(params.id as string);
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: property, isLoading, error } = useQuery<any>({
     queryKey: [`/api/properties/${propertyId}`],
     enabled: !!propertyId && !isNaN(propertyId),
+  });
+
+  const contactMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/conversations", {
+        propertyId,
+        landlordId: property.landlordId,
+      });
+      return response.json();
+    },
+    onSuccess: (conversation) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      setLocation(`/chat/${conversation.id}`);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to start conversation. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const formatPrice = (price: any) => {
@@ -61,12 +89,7 @@ export default function PropertyDetailSimple() {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Debug info */}
-        <div className="mb-4 p-4 bg-blue-50 rounded">
-          <pre className="text-xs overflow-auto max-h-32">
-            {JSON.stringify(property, null, 2)}
-          </pre>
-        </div>
+
 
         {/* Image Gallery */}
         <div className="mb-8">
@@ -157,8 +180,18 @@ export default function PropertyDetailSimple() {
                   ) : null}
                 </div>
 
-                <Button className="w-full bg-secondary hover:bg-secondary/90 text-white">
-                  Contact Landlord
+                <Button 
+                  className="w-full bg-secondary hover:bg-secondary/90 text-white"
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      window.location.href = "/api/login";
+                      return;
+                    }
+                    contactMutation.mutate();
+                  }}
+                  disabled={contactMutation.isPending}
+                >
+                  {contactMutation.isPending ? "Starting conversation..." : "Contact Landlord"}
                 </Button>
 
                 {/* Landlord Info */}
