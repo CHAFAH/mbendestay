@@ -95,7 +95,12 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(properties.regionId, parseInt(filters.region)));
     }
     if (filters.division && filters.division !== "all" && filters.division !== "") {
-      conditions.push(eq(divisions.slug, filters.division));
+      // Handle both division ID (number) and slug (string)
+      if (!isNaN(Number(filters.division))) {
+        conditions.push(eq(properties.divisionId, parseInt(filters.division)));
+      } else {
+        conditions.push(eq(divisions.slug, filters.division));
+      }
     }
     if (filters.propertyType && filters.propertyType !== "all" && filters.propertyType !== "") {
       conditions.push(eq(properties.propertyType, filters.propertyType));
