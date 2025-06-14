@@ -106,13 +106,12 @@ export class DatabaseStorage implements IStorage {
     if (filters.rooms && filters.rooms !== 0) {
       conditions.push(eq(properties.rooms, filters.rooms));
     }
-    // Price filtering temporarily disabled due to type issues
-    // if (filters.minPrice && filters.minPrice > 0) {
-    //   conditions.push(gte(properties.pricePerMonth, filters.minPrice.toString()));
-    // }
-    // if (filters.maxPrice && filters.maxPrice > 0) {
-    //   conditions.push(lte(properties.pricePerMonth, filters.maxPrice.toString()));
-    // }
+    if (filters.minPrice && filters.minPrice > 0) {
+      conditions.push(sql`${properties.pricePerMonth}::numeric >= ${filters.minPrice}`);
+    }
+    if (filters.maxPrice && filters.maxPrice > 0) {
+      conditions.push(sql`${properties.pricePerMonth}::numeric <= ${filters.maxPrice}`);
+    }
 
     const offset = (filters.page - 1) * filters.limit;
 

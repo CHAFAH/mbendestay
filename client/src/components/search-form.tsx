@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { PROPERTY_TYPES } from "@/lib/constants";
@@ -18,6 +19,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
   const [propertyType, setPropertyType] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
+  const [priceRange, setPriceRange] = useState([10000, 500000]);
 
   // Fetch regions
   const { data: regions = [] } = useQuery({
@@ -43,6 +45,8 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
       propertyType,
       checkIn,
       checkOut,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
     });
   };
 
@@ -103,23 +107,19 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
           </Select>
         </div>
 
-        {/* Dates */}
+        {/* Price Range */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-neutral-700">Dates</Label>
-          <div className="flex space-x-2">
-            <Input
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              className="flex-1"
-            />
-            <Input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="flex-1"
-            />
-          </div>
+          <Label className="text-sm font-medium text-neutral-700">
+            Price Range: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} FCFA
+          </Label>
+          <Slider
+            value={priceRange}
+            onValueChange={setPriceRange}
+            min={10000}
+            max={500000}
+            step={10000}
+            className="w-full"
+          />
         </div>
 
         {/* Search Button */}
