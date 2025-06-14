@@ -101,16 +101,11 @@ export class DatabaseStorage implements IStorage {
   async getProperties(filters: SearchProperties): Promise<{ properties: PropertyWithDetails[]; total: number }> {
     const conditions = [eq(properties.isActive, true)];
 
-    if (filters.region && filters.region !== "all" && filters.region !== "") {
-      conditions.push(eq(properties.regionId, parseInt(filters.region)));
+    if (filters.regionId) {
+      conditions.push(eq(properties.regionId, filters.regionId));
     }
-    if (filters.division && filters.division !== "all" && filters.division !== "") {
-      // Handle both division ID (number) and slug (string)
-      if (!isNaN(Number(filters.division))) {
-        conditions.push(eq(properties.divisionId, parseInt(filters.division)));
-      } else {
-        conditions.push(eq(divisions.slug, filters.division));
-      }
+    if (filters.divisionId) {
+      conditions.push(eq(properties.divisionId, filters.divisionId));
     }
     if (filters.propertyType && filters.propertyType !== "all" && filters.propertyType !== "") {
       conditions.push(eq(properties.propertyType, filters.propertyType));

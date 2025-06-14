@@ -195,8 +195,8 @@ export const updateUserSchema = insertUserSchema.partial();
 export const updatePropertySchema = insertPropertySchema.partial();
 
 export const searchPropertiesSchema = z.object({
-  region: z.string().optional(),
-  division: z.string().optional(),
+  regionId: z.number().optional(),
+  divisionId: z.number().optional(),
   propertyType: z.string().optional(),
   contractType: z.string().optional(),
   minPrice: z.number().optional(),
