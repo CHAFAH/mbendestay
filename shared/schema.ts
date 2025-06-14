@@ -109,10 +109,37 @@ export const reviews = pgTable("reviews", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Conversations table for messaging between landlords and renters
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  landlordId: varchar("landlord_id").references(() => users.id).notNull(),
+  renterId: varchar("renter_id").references(() => users.id).notNull(),
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Messages table for storing individual messages
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").references(() => conversations.id).notNull(),
+  senderId: varchar("sender_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  messageType: varchar("message_type", { length: 20 }).default("text").notNull(), // text, image, system
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   properties: many(properties),
   reviews: many(reviews),
+  landlordConversations: many(conversations, { relationName: "landlordConversations" }),
+  renterConversations: many(conversations, { relationName: "renterConversations" }),
+  sentMessages: many(messages),
 }));
 
 export const regionsRelations = relations(regions, ({ many }) => ({
@@ -143,6 +170,36 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   }),
   inquiries: many(inquiries),
   reviews: many(reviews),
+  conversations: many(conversations),
+}));
+
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  property: one(properties, {
+    fields: [conversations.propertyId],
+    references: [properties.id],
+  }),
+  landlord: one(users, {
+    fields: [conversations.landlordId],
+    references: [users.id],
+    relationName: "landlordConversations",
+  }),
+  renter: one(users, {
+    fields: [conversations.renterId],
+    references: [users.id],
+    relationName: "renterConversations",
+  }),
+  messages: many(messages),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+  }),
 }));
 
 export const inquiriesRelations = relations(inquiries, ({ one }) => ({
@@ -232,4 +289,21 @@ export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type ReviewWithDetails = Review & {
   reviewer?: User;
+};
+
+// Messaging types
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = typeof conversations.$inferInsert;
+export type ConversationWithDetails = Conversation & {
+  property: Property;
+  landlord: User;
+  renter: User;
+  messages?: MessageWithSender[];
+  unreadCount?: number;
+};
+
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = typeof messages.$inferInsert;
+export type MessageWithSender = Message & {
+  sender: User;
 };

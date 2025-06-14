@@ -5,6 +5,8 @@ import {
   divisions,
   inquiries,
   reviews,
+  conversations,
+  messages,
   type User,
   type UpsertUser,
   type Property,
@@ -19,6 +21,12 @@ import {
   type Review,
   type InsertReview,
   type ReviewWithDetails,
+  type Conversation,
+  type ConversationWithDetails,
+  type InsertConversation,
+  type Message,
+  type MessageWithSender,
+  type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, ilike, inArray, desc, sql } from "drizzle-orm";
@@ -51,6 +59,15 @@ export interface IStorage {
   getReviewsByProperty(propertyId: number): Promise<ReviewWithDetails[]>;
   getPropertyRatingStats(propertyId: number): Promise<{ averageRating: number; reviewCount: number }>;
   deleteReview(reviewId: number, userId: string): Promise<void>;
+
+  // Messaging operations
+  getOrCreateConversation(propertyId: number, landlordId: string, renterId: string): Promise<Conversation>;
+  getConversationsByUser(userId: string): Promise<ConversationWithDetails[]>;
+  getConversation(conversationId: number, userId: string): Promise<ConversationWithDetails | undefined>;
+  sendMessage(message: InsertMessage): Promise<Message>;
+  getMessagesByConversation(conversationId: number): Promise<MessageWithSender[]>;
+  markMessagesAsRead(conversationId: number, userId: string): Promise<void>;
+  getUnreadMessageCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
