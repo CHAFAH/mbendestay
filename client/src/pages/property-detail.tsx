@@ -27,8 +27,19 @@ import {
   Phone,
   Mail,
   MessageSquare,
-  Check
+  Check,
+  X,
+  ChefHat,
+  Snowflake,
+  PawPrint,
+  Waves,
+  Dumbbell,
+  WashingMachine,
+  TreePine,
+  Shield,
+  Zap
 } from "lucide-react";
+import { AMENITIES } from "@/lib/constants";
 
 export default function PropertyDetail() {
   const params = useParams();
@@ -122,9 +133,18 @@ export default function PropertyDetail() {
   };
 
   const amenityIcons: Record<string, any> = {
-    "WiFi": Wifi,
+    "Wi-Fi": Wifi,
+    "Kitchen": ChefHat,
     "Parking": Car,
-    "Kitchen": Utensils,
+    "A/C": Snowflake,
+    "Pet Friendly": PawPrint,
+    "Swimming Pool": Waves,
+    "Gym": Dumbbell,
+    "Laundry": WashingMachine,
+    "Balcony": TreePine,
+    "Garden": TreePine,
+    "Security": Shield,
+    "Generator": Zap,
   };
 
   if (isLoading) {
@@ -278,22 +298,28 @@ export default function PropertyDetail() {
                 </div>
                 
                 {/* Amenities */}
-                {property.amenities && property.amenities.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Amenities</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {property.amenities.map((amenity: string, index: number) => {
-                        const IconComponent = amenityIcons[amenity];
-                        return (
-                          <div key={index} className="flex items-center space-x-2">
-                            {IconComponent && <IconComponent className="w-4 h-4 text-neutral-600" />}
-                            <span className="text-sm">{amenity}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Amenities & Features</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {AMENITIES.map((amenity: string, index: number) => {
+                      const isIncluded = property.amenities?.includes(amenity) || false;
+                      const IconComponent = amenityIcons[amenity];
+                      return (
+                        <div key={index} className="flex items-center space-x-2">
+                          {isIncluded ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <X className="w-4 h-4 text-red-500" />
+                          )}
+                          {IconComponent && <IconComponent className="w-4 h-4 text-neutral-600" />}
+                          <span className={`text-sm ${isIncluded ? 'text-neutral-800' : 'text-neutral-500'}`}>
+                            {amenity}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
 
