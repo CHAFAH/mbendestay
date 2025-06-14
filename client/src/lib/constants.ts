@@ -48,8 +48,10 @@ export const SUBSCRIPTION_PLANS = {
     duration: "month",
     features: [
       "Up to 5 property listings",
-      "Photo & video uploads",
+      "Photo uploads",
       "Guest messaging system",
+      "Chat support",
+      "Basic analytics",
     ],
   },
   yearly: {
@@ -57,8 +59,13 @@ export const SUBSCRIPTION_PLANS = {
     duration: "year",
     features: [
       "Unlimited property listings",
+      "Photo & video uploads",
       "Priority search placement",
       "Advanced analytics dashboard",
+      "Contract templates",
+      "Guest messaging system",
+      "Chat support",
+      "Priority support",
     ],
     savings: "Save 33%",
   },

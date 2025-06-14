@@ -236,7 +236,7 @@ export default function Landing() {
               <div>
                 <h4 className="font-semibold text-lg mb-3">Monthly Subscription</h4>
                 <div className="text-3xl font-bold text-accent mb-2">
-                  ₣{SUBSCRIPTION_PLANS.monthly.price.toLocaleString()} 
+                  {SUBSCRIPTION_PLANS.monthly.price.toLocaleString()} XCFA
                   <span className="text-lg font-normal text-white/80"> / month</span>
                 </div>
                 <ul className="space-y-2 text-white/90">
@@ -256,7 +256,7 @@ export default function Landing() {
                   </span>
                 </h4>
                 <div className="text-3xl font-bold text-accent mb-2">
-                  ₣{SUBSCRIPTION_PLANS.yearly.price.toLocaleString()} 
+                  {SUBSCRIPTION_PLANS.yearly.price.toLocaleString()} XCFA
                   <span className="text-lg font-normal text-white/80"> / year</span>
                 </div>
                 <ul className="space-y-2 text-white/90">
