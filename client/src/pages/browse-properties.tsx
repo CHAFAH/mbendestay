@@ -153,7 +153,7 @@ export default function BrowseProperties() {
                       <SelectValue placeholder="Any Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any Type</SelectItem>
+                      <SelectItem value="all">Any Type</SelectItem>
                       {PROPERTY_TYPES.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
@@ -174,7 +174,7 @@ export default function BrowseProperties() {
                       <SelectValue placeholder="Any Contract" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any Contract</SelectItem>
+                      <SelectItem value="all">Any Contract</SelectItem>
                       {CONTRACT_TYPES.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
@@ -215,7 +215,7 @@ export default function BrowseProperties() {
                       <SelectValue placeholder="Any" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any</SelectItem>
+                      <SelectItem value="all">Any</SelectItem>
                       <SelectItem value="1">1 Room</SelectItem>
                       <SelectItem value="2">2 Rooms</SelectItem>
                       <SelectItem value="3">3 Rooms</SelectItem>

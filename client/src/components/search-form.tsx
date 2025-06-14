@@ -57,7 +57,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
               <SelectValue placeholder="All Regions" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Regions</SelectItem>
+              <SelectItem value="all">All Regions</SelectItem>
               {regions.map((r: any) => (
                 <SelectItem key={r.id} value={r.id.toString()}>
                   {r.name}
@@ -75,7 +75,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
               <SelectValue placeholder="Select Division" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Divisions</SelectItem>
+              <SelectItem value="all">All Divisions</SelectItem>
               {divisions.map((d: any) => (
                 <SelectItem key={d.id} value={d.slug}>
                   {d.name}
@@ -93,7 +93,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
               <SelectValue placeholder="Any Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any Type</SelectItem>
+              <SelectItem value="all">Any Type</SelectItem>
               {PROPERTY_TYPES.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
