@@ -55,12 +55,17 @@ export default function Landing() {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Cameroon Flag */}
           <div className="absolute top-16 left-16 w-20 h-14 animate-pulse opacity-90" style={{ animationDelay: '0s', animationDuration: '4s' }}>
-            <img src="https://images.unsplash.com/photo-1555212697-194d092e3b8f?w=80&h=56&fit=crop&crop=center" alt="Cameroon Flag" className="w-full h-full object-cover rounded shadow-lg" />
+            <div className="w-full h-full rounded shadow-lg bg-gradient-to-b from-green-600 via-red-600 to-yellow-500 border border-white/20"></div>
           </div>
           
           {/* Crab */}
           <div className="absolute top-20 right-24 w-16 h-16 animate-bounce opacity-80" style={{ animationDelay: '0.5s', animationDuration: '3s' }}>
-            <img src="https://images.unsplash.com/photo-1565029245275-39e99c99ad46?w=64&h=64&fit=crop&crop=center" alt="Crab" className="w-full h-full object-cover rounded-full shadow-lg" />
+            <div className="w-full h-full rounded-full shadow-lg bg-gradient-to-br from-red-600 to-orange-700 border-2 border-white/30 flex items-center justify-center">
+              <div className="w-8 h-6 bg-red-400 rounded-lg relative">
+                <div className="absolute -left-1 top-1 w-2 h-2 bg-red-300 rounded-full"></div>
+                <div className="absolute -right-1 top-1 w-2 h-2 bg-red-300 rounded-full"></div>
+              </div>
+            </div>
           </div>
           
           {/* Elephant */}
@@ -93,14 +98,18 @@ export default function Landing() {
             <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=48&h=48&fit=crop&crop=center" alt="Peace Plant" className="w-full h-full object-cover rounded-full shadow-lg" />
           </div>
           
-          {/* Additional Rice Field */}
+          {/* Coastal Scene */}
           <div className="absolute top-24 right-1/3 w-12 h-12 animate-pulse opacity-60" style={{ animationDelay: '4s', animationDuration: '5s' }}>
-            <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=48&h=48&fit=crop&crop=center" alt="Rice Field" className="w-full h-full object-cover rounded-full shadow-lg" />
+            <div className="w-full h-full rounded-full shadow-lg bg-gradient-to-b from-blue-400 to-blue-600 border-2 border-white/30 flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
           </div>
           
           {/* Additional Crab */}
           <div className="absolute bottom-20 right-16 w-12 h-12 animate-bounce opacity-70" style={{ animationDelay: '3.5s', animationDuration: '4.5s' }}>
-            <img src="https://images.unsplash.com/photo-1565029245275-39e99c99ad46?w=48&h=48&fit=crop&crop=center" alt="Coastal Crab" className="w-full h-full object-cover rounded-full shadow-lg" />
+            <div className="w-full h-full rounded-full shadow-lg bg-gradient-to-br from-orange-600 to-red-700 border-2 border-white/30 flex items-center justify-center">
+              <div className="w-6 h-4 bg-orange-400 rounded-sm"></div>
+            </div>
           </div>
         </div>
 
