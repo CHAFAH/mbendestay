@@ -74,8 +74,8 @@ export default function PropertyDetail() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to Send Inquiry",
-        description: error.message,
+        title: "Error",
+        description: error.message || "Failed to send inquiry. Please try again.",
         variant: "destructive",
       });
     },
@@ -86,86 +86,41 @@ export default function PropertyDetail() {
     inquiryMutation.mutate(inquiryData);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-neutral-50">
-        <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse">
-            <div className="h-96 bg-neutral-200 rounded-xl mb-8" />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-4">
-                <div className="h-8 bg-neutral-200 rounded w-3/4" />
-                <div className="h-4 bg-neutral-200 rounded w-1/2" />
-                <div className="h-32 bg-neutral-200 rounded" />
-              </div>
-              <div className="h-96 bg-neutral-200 rounded-xl" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!property) {
-    return (
-      <div className="min-h-screen bg-neutral-50">
-        <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-neutral-800 mb-4">Property Not Found</h1>
-            <p className="text-neutral-600">The property you're looking for doesn't exist or has been removed.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const formatPrice = (price: string | null) => {
+  const formatPrice = (price: number | null) => {
     if (!price) return "Contact for price";
-    return `XCFA ${parseInt(price).toLocaleString()}`;
-  };
-
-  const getPropertyTypeColor = (type: string) => {
-    switch (type) {
-      case "apartment":
-        return "bg-accent text-accent-foreground";
-      case "guestHouse":
-        return "bg-secondary text-secondary-foreground";
-      case "room":
-        return "bg-primary text-primary-foreground";
-      case "studio":
-        return "bg-blue-500 text-white";
-      case "officeSpace":
-        return "bg-purple-500 text-white";
-      case "commercial":
-        return "bg-orange-500 text-white";
-      default:
-        return "bg-neutral-200 text-neutral-700";
-    }
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XAF',
+      minimumFractionDigits: 0,
+    }).format(price);
   };
 
   const getPropertyTypeLabel = (type: string) => {
-    switch (type) {
-      case "guestHouse":
-        return "Guest House";
-      case "officeSpace":
-        return "Office Space";
-      case "apartment":
-        return "Apartment";
-      case "room":
-        return "Room";
-      case "studio":
-        return "Studio";
-      case "commercial":
-        return "Commercial";
-      default:
-        return type.charAt(0).toUpperCase() + type.slice(1);
-    }
+    const labels: Record<string, string> = {
+      apartment: "Apartment",
+      guestHouse: "Guest House",
+      room: "Room",
+      studio: "Studio",
+      officeSpace: "Office Space",
+      commercial: "Commercial"
+    };
+    return labels[type] || type;
   };
 
-  const amenityIcons: { [key: string]: any } = {
-    "Wi-Fi": Wifi,
+  const getPropertyTypeColor = (type: string) => {
+    const colors: Record<string, string> = {
+      apartment: "bg-blue-100 text-blue-800",
+      guestHouse: "bg-green-100 text-green-800",
+      room: "bg-purple-100 text-purple-800",
+      studio: "bg-orange-100 text-orange-800",
+      officeSpace: "bg-gray-100 text-gray-800",
+      commercial: "bg-red-100 text-red-800"
+    };
+    return colors[type] || "bg-neutral-100 text-neutral-800";
+  };
+
+  const amenityIcons: Record<string, any> = {
+    "WiFi": Wifi,
     "Parking": Car,
     "Kitchen": Utensils,
   };
@@ -256,21 +211,29 @@ export default function PropertyDetail() {
                   <h1 className="font-bold text-3xl text-neutral-800 mb-2">{property.title}</h1>
                   <div className="flex items-center text-neutral-600 mb-4">
                     <MapPin className="w-4 h-4 mr-1" />
-                    <span>{property.division.name}, {property.region.name}</span>
+                    <span>{property.division?.name}, {property.region?.name}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-5 h-5 text-accent fill-current" />
-                    <span className="font-medium">4.8</span>
-                    <span className="text-neutral-600">(23 reviews)</span>
+                  
+                  {/* Ratings */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium">{property.averageRating?.toFixed(1) || 'New'}</span>
+                      {property.reviewCount && property.reviewCount > 0 && (
+                        <span className="text-neutral-600">({property.reviewCount} reviews)</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
-                <div className="flex space-x-2">
-                  <Button variant="ghost" size="sm">
-                    <Heart className="w-4 h-4" />
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <Share2 className="w-4 h-4" />
+                  <Button variant="outline" size="sm">
+                    <Heart className="w-4 h-4 mr-2" />
+                    Save
                   </Button>
                 </div>
               </div>
@@ -279,24 +242,26 @@ export default function PropertyDetail() {
             {/* Description */}
             <Card>
               <CardHeader>
-                <CardTitle>About this property</CardTitle>
+                <CardTitle>About this place</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-neutral-700 leading-relaxed">{property.description}</p>
+                <p className="text-neutral-700 leading-relaxed">
+                  {property.description}
+                </p>
               </CardContent>
             </Card>
 
-            {/* Property Info */}
+            {/* Property Features */}
             <Card>
               <CardHeader>
                 <CardTitle>Property Details</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {property.rooms && (
                     <div className="flex items-center space-x-2">
                       <Users className="w-5 h-5 text-neutral-600" />
-                      <span>{property.rooms} {property.rooms === 1 ? 'Room' : 'Rooms'}</span>
+                      <span>{property.rooms} {property.rooms === 1 ? 'room' : 'rooms'}</span>
                     </div>
                   )}
                   {property.size && (
@@ -306,47 +271,39 @@ export default function PropertyDetail() {
                     </div>
                   )}
                   <div className="flex items-center space-x-2">
-                    <MapPin className="w-5 h-5 text-neutral-600" />
-                    <span>{property.contractType.replace('_', ' ')}</span>
+                    <Badge variant="outline">{property.contractType.replace('_', ' ')}</Badge>
                   </div>
                 </div>
+                
+                {/* Amenities */}
+                {property.amenities && property.amenities.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Amenities</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {property.amenities.map((amenity: string, index: number) => {
+                        const IconComponent = amenityIcons[amenity];
+                        return (
+                          <div key={index} className="flex items-center space-x-2">
+                            {IconComponent && <IconComponent className="w-4 h-4 text-neutral-600" />}
+                            <span className="text-sm">{amenity}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Amenities */}
-            {property.amenities && property.amenities.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Amenities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {property.amenities.map((amenity: string) => {
-                      const IconComponent = amenityIcons[amenity] || Check;
-                      return (
-                        <div key={amenity} className="flex items-center space-x-2">
-                          <IconComponent className="w-5 h-5 text-primary" />
-                          <span>{amenity}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Map placeholder */}
+            {/* Location */}
             <Card>
               <CardHeader>
                 <CardTitle>Location</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-neutral-200 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                    <p className="text-neutral-600">Map integration coming soon</p>
-                    <p className="text-sm text-neutral-500">{property.division.name}, {property.region.name}</p>
-                  </div>
+                <div className="flex items-center space-x-2 text-neutral-700">
+                  <MapPin className="w-5 h-5" />
+                  <span>{property.division?.name}, {property.region?.name}, Cameroon</span>
                 </div>
               </CardContent>
             </Card>
@@ -384,7 +341,7 @@ export default function PropertyDetail() {
                   <h4 className="font-semibold mb-3">Hosted by</h4>
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center">
-                      {property.landlord.profileImageUrl ? (
+                      {property.landlord?.profileImageUrl ? (
                         <img 
                           src={property.landlord.profileImageUrl} 
                           alt="Host" 
@@ -392,13 +349,13 @@ export default function PropertyDetail() {
                         />
                       ) : (
                         <span className="font-semibold text-neutral-600">
-                          {property.landlord.firstName?.[0] || property.landlord.email?.[0]?.toUpperCase() || 'H'}
+                          {property.landlord?.firstName?.[0] || (property.landlord?.email ? property.landlord.email[0].toUpperCase() : 'H')}
                         </span>
                       )}
                     </div>
                     <div>
                       <div className="font-medium">
-                        {property.landlord.firstName && property.landlord.lastName 
+                        {property.landlord?.firstName && property.landlord?.lastName 
                           ? `${property.landlord.firstName} ${property.landlord.lastName}`
                           : 'Host'
                         }
@@ -408,13 +365,13 @@ export default function PropertyDetail() {
                   </div>
                   
                   <div className="mt-4 space-y-2">
-                    {property.landlord.email && (
+                    {property.landlord?.email && (
                       <div className="flex items-center space-x-2 text-sm">
                         <Mail className="w-4 h-4 text-neutral-600" />
                         <span className="text-neutral-700">{property.landlord.email}</span>
                       </div>
                     )}
-                    {property.landlord.phoneNumber && (
+                    {property.landlord?.phoneNumber && (
                       <div className="flex items-center space-x-2 text-sm">
                         <Phone className="w-4 h-4 text-neutral-600" />
                         <span className="text-neutral-700">{property.landlord.phoneNumber}</span>
@@ -429,42 +386,32 @@ export default function PropertyDetail() {
 
         {/* Inquiry Form Modal */}
         {showInquiryForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  Contact Landlord
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowInquiryForm(false)}
-                  >
-                    ×
-                  </Button>
-                </CardTitle>
+                <CardTitle>Contact Landlord</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleInquirySubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="guestName">Full Name *</Label>
-                      <Input
-                        id="guestName"
-                        value={inquiryData.guestName}
-                        onChange={(e) => setInquiryData(prev => ({ ...prev, guestName: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="guestEmail">Email *</Label>
-                      <Input
-                        id="guestEmail"
-                        type="email"
-                        value={inquiryData.guestEmail}
-                        onChange={(e) => setInquiryData(prev => ({ ...prev, guestEmail: e.target.value }))}
-                        required
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="guestName">Full Name</Label>
+                    <Input
+                      id="guestName"
+                      value={inquiryData.guestName}
+                      onChange={(e) => setInquiryData(prev => ({ ...prev, guestName: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="guestEmail">Email</Label>
+                    <Input
+                      id="guestEmail"
+                      type="email"
+                      value={inquiryData.guestEmail}
+                      onChange={(e) => setInquiryData(prev => ({ ...prev, guestEmail: e.target.value }))}
+                      required
+                    />
                   </div>
                   
                   <div>
@@ -473,30 +420,30 @@ export default function PropertyDetail() {
                       id="guestPhone"
                       value={inquiryData.guestPhone}
                       onChange={(e) => setInquiryData(prev => ({ ...prev, guestPhone: e.target.value }))}
+                      required
                     />
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="checkInDate">Check-in Date</Label>
-                      <Input
-                        id="checkInDate"
-                        type="date"
-                        value={inquiryData.checkInDate}
-                        onChange={(e) => setInquiryData(prev => ({ ...prev, checkInDate: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="checkOutDate">Check-out Date</Label>
-                      <Input
-                        id="checkOutDate"
-                        type="date"
-                        value={inquiryData.checkOutDate}
-                        onChange={(e) => setInquiryData(prev => ({ ...prev, checkOutDate: e.target.value }))}
-                      />
-                    </div>
+                  
+                  <div>
+                    <Label htmlFor="checkInDate">Check-in Date</Label>
+                    <Input
+                      id="checkInDate"
+                      type="date"
+                      value={inquiryData.checkInDate}
+                      onChange={(e) => setInquiryData(prev => ({ ...prev, checkInDate: e.target.value }))}
+                    />
                   </div>
-
+                  
+                  <div>
+                    <Label htmlFor="checkOutDate">Check-out Date</Label>
+                    <Input
+                      id="checkOutDate"
+                      type="date"
+                      value={inquiryData.checkOutDate}
+                      onChange={(e) => setInquiryData(prev => ({ ...prev, checkOutDate: e.target.value }))}
+                    />
+                  </div>
+                  
                   <div>
                     <Label htmlFor="guests">Number of Guests</Label>
                     <Input
@@ -504,37 +451,35 @@ export default function PropertyDetail() {
                       type="number"
                       min="1"
                       value={inquiryData.guests}
-                      onChange={(e) => setInquiryData(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
+                      onChange={(e) => setInquiryData(prev => ({ ...prev, guests: parseInt(e.target.value) }))}
                     />
                   </div>
-
+                  
                   <div>
-                    <Label htmlFor="message">Message *</Label>
+                    <Label htmlFor="message">Message</Label>
                     <Textarea
                       id="message"
-                      placeholder="Tell the landlord about your stay requirements..."
                       value={inquiryData.message}
                       onChange={(e) => setInquiryData(prev => ({ ...prev, message: e.target.value }))}
-                      required
+                      placeholder="Tell the landlord about your inquiry..."
                       rows={4}
                     />
                   </div>
-
-                  <div className="flex space-x-3 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowInquiryForm(false)}
+                  
+                  <div className="flex space-x-2">
+                    <Button 
+                      type="submit" 
+                      disabled={inquiryMutation.isPending}
                       className="flex-1"
                     >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={inquiryMutation.isPending}
-                      className="flex-1 bg-secondary hover:bg-secondary/90"
-                    >
                       {inquiryMutation.isPending ? "Sending..." : "Send Inquiry"}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowInquiryForm(false)}
+                    >
+                      Cancel
                     </Button>
                   </div>
                 </form>
