@@ -43,9 +43,15 @@ export default function BrowseProperties() {
     }));
   }, [location]);
 
-  const { data: properties, isLoading } = useQuery({
+  const { data: propertiesData, isLoading } = useQuery<{
+    properties: PropertyWithDetails[];
+    total: number;
+  }>({
     queryKey: ["/api/properties", filters],
   });
+
+  const properties = propertiesData?.properties || [];
+  const total = propertiesData?.total || 0;
 
   const handleSearch = (newFilters: any) => {
     setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
@@ -83,7 +89,7 @@ export default function BrowseProperties() {
     });
   };
 
-  const totalPages = properties?.total ? Math.ceil(properties.total / 12) : 0;
+  const totalPages = total ? Math.ceil(total / 12) : 0;
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -96,7 +102,7 @@ export default function BrowseProperties() {
             <div>
               <h1 className="font-bold text-3xl text-neutral-800">Browse Properties</h1>
               <p className="text-neutral-600 mt-2">
-                {properties?.total || 0} properties found
+                {total} properties found
               </p>
             </div>
             
