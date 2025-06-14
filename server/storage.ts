@@ -92,7 +92,7 @@ export class DatabaseStorage implements IStorage {
     const conditions = [];
 
     if (filters.region) {
-      conditions.push(eq(regions.slug, filters.region));
+      conditions.push(eq(properties.regionId, parseInt(filters.region)));
     }
     if (filters.division) {
       conditions.push(eq(divisions.slug, filters.division));
@@ -107,10 +107,10 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(properties.rooms, filters.rooms));
     }
     if (filters.minPrice) {
-      conditions.push(gte(properties.pricePerNight, filters.minPrice.toString()));
+      conditions.push(gte(properties.pricePerMonth, filters.minPrice));
     }
     if (filters.maxPrice) {
-      conditions.push(lte(properties.pricePerNight, filters.maxPrice.toString()));
+      conditions.push(lte(properties.pricePerMonth, filters.maxPrice));
     }
 
     conditions.push(eq(properties.isActive, true));
