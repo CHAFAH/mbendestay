@@ -8,7 +8,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import BrowseProperties from "@/pages/browse-properties";
-import PropertyDetail from "@/pages/property-detail";
+import PropertyDetail from "@/pages/property-detail-simple";
 import LandlordDashboard from "@/pages/landlord-dashboard";
 import LandlordRegistration from "@/pages/landlord-registration";
 import MessagesPage from "@/pages/messages";

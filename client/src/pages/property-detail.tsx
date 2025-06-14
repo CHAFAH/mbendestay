@@ -86,13 +86,14 @@ export default function PropertyDetail() {
     inquiryMutation.mutate(inquiryData);
   };
 
-  const formatPrice = (price: number | null) => {
+  const formatPrice = (price: number | string | null) => {
     if (!price) return "Contact for price";
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XAF',
       minimumFractionDigits: 0,
-    }).format(price);
+    }).format(numPrice);
   };
 
   const getPropertyTypeLabel = (type: string) => {
@@ -102,9 +103,10 @@ export default function PropertyDetail() {
       room: "Room",
       studio: "Studio",
       officeSpace: "Office Space",
-      commercial: "Commercial"
+      commercial: "Commercial",
+      house: "House"
     };
-    return labels[type] || type;
+    return labels[type] || type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   const getPropertyTypeColor = (type: string) => {
