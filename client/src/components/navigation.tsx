@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Home, Search, Building, User, Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import SimpleLanguageSwitcher from "@/components/simple-language-switcher";
 
 export default function Navigation() {
   const { isAuthenticated, user } = useAuth();

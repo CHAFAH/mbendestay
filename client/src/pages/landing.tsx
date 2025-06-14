@@ -22,6 +22,8 @@ import { SUBSCRIPTION_PLANS, useTranslation } from "@/lib/constants";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
+  const { language } = useLanguage();
+  const { t } = useTranslation(language);
 
   const { data: featuredProperties } = useQuery({
     queryKey: ["/api/properties", { limit: 6 }],
@@ -243,7 +245,7 @@ export default function Landing() {
                 <span className="text-lg text-white/80">per month</span>
               </div>
               <ul className="space-y-3 text-white/90">
-                {SUBSCRIPTION_PLANS.monthly.features.map((feature, index) => (
+                {SUBSCRIPTION_PLANS.monthly.features[language].map((feature, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
                     <span>{feature}</span>
@@ -263,7 +265,7 @@ export default function Landing() {
             <div className="bg-white/20 rounded-2xl p-6 text-left border-2 border-accent relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-accent text-primary text-sm px-4 py-1 rounded-full font-semibold">
-                  {SUBSCRIPTION_PLANS.yearly.savings}
+                  {SUBSCRIPTION_PLANS.yearly.savings[language]}
                 </span>
               </div>
               <h4 className="font-semibold text-xl mb-3 text-center">Yearly Subscription</h4>
@@ -274,7 +276,7 @@ export default function Landing() {
                 <span className="text-lg text-white/80">per year</span>
               </div>
               <ul className="space-y-3 text-white/90">
-                {SUBSCRIPTION_PLANS.yearly.features.map((feature, index) => (
+                {SUBSCRIPTION_PLANS.yearly.features[language].map((feature, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
                     <span>{feature}</span>
