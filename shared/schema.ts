@@ -93,9 +93,26 @@ export const inquiries = pgTable("inquiries", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull().references(() => properties.id),
+  reviewerId: varchar("reviewer_id").references(() => users.id),
+  rating: integer("rating").notNull(), // 1-5 stars
+  title: varchar("title", { length: 200 }).notNull(),
+  comment: text("comment").notNull(),
+  stayDuration: varchar("stay_duration", { length: 50 }), // e.g., "3 months", "1 week"
+  reviewerName: varchar("reviewer_name", { length: 100 }).notNull(),
+  reviewerEmail: varchar("reviewer_email", { length: 100 }).notNull(),
+  isVerified: boolean("is_verified").default(false).notNull(),
+  isHelpful: integer("helpful_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   properties: many(properties),
+  reviews: many(reviews),
 }));
 
 export const regionsRelations = relations(regions, ({ many }) => ({
@@ -125,12 +142,24 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     references: [divisions.id],
   }),
   inquiries: many(inquiries),
+  reviews: many(reviews),
 }));
 
 export const inquiriesRelations = relations(inquiries, ({ one }) => ({
   property: one(properties, {
     fields: [inquiries.propertyId],
     references: [properties.id],
+  }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  property: one(properties, {
+    fields: [reviews.propertyId],
+    references: [properties.id],
+  }),
+  reviewer: one(users, {
+    fields: [reviews.reviewerId],
+    references: [users.id],
   }),
 }));
 
@@ -150,6 +179,16 @@ export const insertInquirySchema = createInsertSchema(inquiries).omit({
   id: true,
   createdAt: true,
   status: true,
+});
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  isVerified: true,
+  isHelpful: true,
+}).extend({
+  rating: z.number().min(1).max(5),
 });
 
 export const updateUserSchema = insertUserSchema.partial();
