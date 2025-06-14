@@ -482,7 +482,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           // Get sender details
-          const sender = await storage.getUser(userId);
+          const sender = await storage.getUser(userId!);
           const messageWithSender = {
             ...newMessage,
             sender

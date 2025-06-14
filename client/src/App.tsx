@@ -11,6 +11,8 @@ import BrowseProperties from "@/pages/browse-properties";
 import PropertyDetail from "@/pages/property-detail";
 import LandlordDashboard from "@/pages/landlord-dashboard";
 import LandlordRegistration from "@/pages/landlord-registration";
+import MessagesPage from "@/pages/messages";
+import ChatPage from "@/pages/chat";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -31,6 +33,8 @@ function Router() {
           <Route path="/property/:id" component={PropertyDetail} />
           <Route path="/dashboard" component={LandlordDashboard} />
           <Route path="/register-landlord" component={LandlordRegistration} />
+          <Route path="/messages" component={MessagesPage} />
+          <Route path="/messages/:id" component={ChatPage} />
         </>
       )}
       <Route component={NotFound} />
