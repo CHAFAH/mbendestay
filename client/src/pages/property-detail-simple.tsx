@@ -9,6 +9,7 @@ import { MapPin, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import ReviewDisplay from "@/components/review-display";
 
 export default function PropertyDetailSimple() {
   const params = useParams();
@@ -227,6 +228,11 @@ export default function PropertyDetailSimple() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <ReviewDisplay propertyId={propertyId} />
         </div>
       </div>
 
