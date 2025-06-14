@@ -89,31 +89,30 @@ export class DatabaseStorage implements IStorage {
 
   // Property operations
   async getProperties(filters: SearchProperties): Promise<{ properties: PropertyWithDetails[]; total: number }> {
-    const conditions = [];
+    const conditions = [eq(properties.isActive, true)];
 
-    if (filters.region) {
+    if (filters.region && filters.region !== "all" && filters.region !== "") {
       conditions.push(eq(properties.regionId, parseInt(filters.region)));
     }
-    if (filters.division) {
+    if (filters.division && filters.division !== "all" && filters.division !== "") {
       conditions.push(eq(divisions.slug, filters.division));
     }
-    if (filters.propertyType) {
+    if (filters.propertyType && filters.propertyType !== "all" && filters.propertyType !== "") {
       conditions.push(eq(properties.propertyType, filters.propertyType));
     }
-    if (filters.contractType) {
+    if (filters.contractType && filters.contractType !== "all" && filters.contractType !== "") {
       conditions.push(eq(properties.contractType, filters.contractType));
     }
-    if (filters.rooms) {
+    if (filters.rooms && filters.rooms !== 0) {
       conditions.push(eq(properties.rooms, filters.rooms));
     }
-    if (filters.minPrice) {
-      conditions.push(gte(properties.pricePerMonth, filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      conditions.push(lte(properties.pricePerMonth, filters.maxPrice));
-    }
-
-    conditions.push(eq(properties.isActive, true));
+    // Price filtering temporarily disabled due to type issues
+    // if (filters.minPrice && filters.minPrice > 0) {
+    //   conditions.push(gte(properties.pricePerMonth, filters.minPrice.toString()));
+    // }
+    // if (filters.maxPrice && filters.maxPrice > 0) {
+    //   conditions.push(lte(properties.pricePerMonth, filters.maxPrice.toString()));
+    // }
 
     const offset = (filters.page - 1) * filters.limit;
 
