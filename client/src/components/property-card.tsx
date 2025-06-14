@@ -17,17 +17,23 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
   const formatPrice = (price: string | null) => {
     if (!price) return "Contact for price";
-    return `₣${parseInt(price).toLocaleString()}`;
+    return `XCFA ${parseInt(price).toLocaleString()}`;
   };
 
   const getPropertyTypeColor = (type: string) => {
     switch (type) {
       case "apartment":
         return "bg-accent text-accent-foreground";
-      case "guesthouse":
+      case "guestHouse":
         return "bg-secondary text-secondary-foreground";
       case "room":
         return "bg-primary text-primary-foreground";
+      case "studio":
+        return "bg-blue-500 text-white";
+      case "officeSpace":
+        return "bg-purple-500 text-white";
+      case "commercial":
+        return "bg-orange-500 text-white";
       default:
         return "bg-neutral-200 text-neutral-700";
     }

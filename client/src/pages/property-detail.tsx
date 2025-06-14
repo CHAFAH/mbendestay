@@ -122,7 +122,7 @@ export default function PropertyDetail() {
 
   const formatPrice = (price: string | null) => {
     if (!price) return "Contact for price";
-    return `₣${parseInt(price).toLocaleString()}`;
+    return `XCFA ${parseInt(price).toLocaleString()}`;
   };
 
   const getPropertyTypeColor = (type: string) => {

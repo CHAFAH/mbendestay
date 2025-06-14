@@ -266,17 +266,23 @@ export default function LandlordDashboard() {
 
   const formatPrice = (price: string | null) => {
     if (!price) return "Not set";
-    return `₣${parseInt(price).toLocaleString()}`;
+    return `XCFA ${parseInt(price).toLocaleString()}`;
   };
 
   const getPropertyTypeColor = (type: string) => {
     switch (type) {
       case "apartment":
         return "bg-accent text-accent-foreground";
-      case "guesthouse":
+      case "guestHouse":
         return "bg-secondary text-secondary-foreground";
       case "room":
         return "bg-primary text-primary-foreground";
+      case "studio":
+        return "bg-blue-500 text-white";
+      case "officeSpace":
+        return "bg-purple-500 text-white";
+      case "commercial":
+        return "bg-orange-500 text-white";
       default:
         return "bg-neutral-200 text-neutral-700";
     }
@@ -822,7 +828,7 @@ export default function LandlordDashboard() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="pricePerNight">Price per Night (XAF)</Label>
+                <Label htmlFor="pricePerNight">Price per Night (XCFA)</Label>
                 <Input
                   id="pricePerNight"
                   type="number"
@@ -831,7 +837,7 @@ export default function LandlordDashboard() {
                 />
               </div>
               <div>
-                <Label htmlFor="pricePerMonth">Price per Month (XAF)</Label>
+                <Label htmlFor="pricePerMonth">Price per Month (XCFA)</Label>
                 <Input
                   id="pricePerMonth"
                   type="number"
