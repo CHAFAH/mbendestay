@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
@@ -334,6 +335,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Messaging routes
+  app.get("/api/conversations", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const conversations = await storage.getConversationsByUser(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.get("/api/conversations/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const conversationId = parseInt(req.params.id);
+      const conversation = await storage.getConversation(conversationId, userId);
+      
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+
+      // Mark messages as read
+      await storage.markMessagesAsRead(conversationId, userId);
+      
+      res.json(conversation);
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      res.status(500).json({ message: "Failed to fetch conversation" });
+    }
+  });
+
+  app.post("/api/conversations", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { propertyId, message } = req.body;
+
+      // Get property to find landlord
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      const landlordId = property.landlord.id;
+      const renterId = userId;
+
+      // Get or create conversation
+      const conversation = await storage.getOrCreateConversation(
+        propertyId,
+        landlordId,
+        renterId
+      );
+
+      // Send initial message if provided
+      if (message) {
+        await storage.sendMessage({
+          conversationId: conversation.id,
+          senderId: userId,
+          content: message,
+          messageType: "text",
+        });
+      }
+
+      res.json(conversation);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  app.post("/api/conversations/:id/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const conversationId = parseInt(req.params.id);
+      const { content, messageType = "text" } = req.body;
+
+      // Verify user has access to this conversation
+      const conversation = await storage.getConversation(conversationId, userId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+
+      const message = await storage.sendMessage({
+        conversationId,
+        senderId: userId,
+        content,
+        messageType,
+      });
+
+      res.json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.get("/api/messages/unread-count", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const count = await storage.getUnreadMessageCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
   const httpServer = createServer(app);
+
+  // WebSocket server for real-time messaging
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Store active connections with user IDs
+  const activeConnections = new Map<string, WebSocket>();
+
+  wss.on('connection', (ws: WebSocket, req) => {
+    let userId: string | null = null;
+
+    ws.on('message', async (data) => {
+      try {
+        const message = JSON.parse(data.toString());
+        
+        if (message.type === 'auth' && message.userId) {
+          userId = message.userId;
+          activeConnections.set(userId, ws);
+          ws.send(JSON.stringify({ type: 'auth_success', userId }));
+        }
+        
+        if (message.type === 'send_message' && userId) {
+          const { conversationId, content, messageType = 'text' } = message;
+          
+          // Verify user has access to this conversation
+          const conversation = await storage.getConversation(conversationId, userId);
+          if (!conversation) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Conversation not found' }));
+            return;
+          }
+
+          // Save message to database
+          const newMessage = await storage.sendMessage({
+            conversationId,
+            senderId: userId,
+            content,
+            messageType,
+          });
+
+          // Get sender details
+          const sender = await storage.getUser(userId);
+          const messageWithSender = {
+            ...newMessage,
+            sender
+          };
+
+          // Send to both participants
+          const otherUserId = conversation.landlordId === userId 
+            ? conversation.renterId 
+            : conversation.landlordId;
+          
+          const messageData = {
+            type: 'new_message',
+            conversationId,
+            message: messageWithSender
+          };
+
+          // Send to sender
+          if (activeConnections.has(userId)) {
+            activeConnections.get(userId)!.send(JSON.stringify(messageData));
+          }
+
+          // Send to recipient
+          if (activeConnections.has(otherUserId)) {
+            activeConnections.get(otherUserId)!.send(JSON.stringify(messageData));
+          }
+        }
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
+      }
+    });
+
+    ws.on('close', () => {
+      if (userId) {
+        activeConnections.delete(userId);
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+      if (userId) {
+        activeConnections.delete(userId);
+      }
+    });
+  });
+
   return httpServer;
 }

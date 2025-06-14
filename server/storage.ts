@@ -324,6 +324,208 @@ export class DatabaseStorage implements IStorage {
       .delete(reviews)
       .where(and(eq(reviews.id, reviewId), eq(reviews.reviewerId, userId)));
   }
+
+  // Messaging operations
+  async getOrCreateConversation(propertyId: number, landlordId: string, renterId: string): Promise<Conversation> {
+    // Check if conversation already exists
+    const [existingConversation] = await db
+      .select()
+      .from(conversations)
+      .where(
+        and(
+          eq(conversations.propertyId, propertyId),
+          eq(conversations.landlordId, landlordId),
+          eq(conversations.renterId, renterId)
+        )
+      );
+
+    if (existingConversation) {
+      return existingConversation;
+    }
+
+    // Create new conversation
+    const [newConversation] = await db
+      .insert(conversations)
+      .values({
+        propertyId,
+        landlordId,
+        renterId,
+      })
+      .returning();
+
+    return newConversation;
+  }
+
+  async getConversationsByUser(userId: string): Promise<ConversationWithDetails[]> {
+    const userConversations = await db
+      .select()
+      .from(conversations)
+      .leftJoin(properties, eq(conversations.propertyId, properties.id))
+      .leftJoin(users, eq(conversations.landlordId, users.id))
+      .leftJoin(regions, eq(properties.regionId, regions.id))
+      .leftJoin(divisions, eq(properties.divisionId, divisions.id))
+      .where(
+        and(
+          eq(conversations.isActive, true),
+          sql`(${conversations.landlordId} = ${userId} OR ${conversations.renterId} = ${userId})`
+        )
+      )
+      .orderBy(desc(conversations.lastMessageAt));
+
+    // Get the other participant for each conversation
+    const conversationsWithDetails = await Promise.all(
+      userConversations.map(async (conv) => {
+        const otherUserId = conv.conversations.landlordId === userId 
+          ? conv.conversations.renterId 
+          : conv.conversations.landlordId;
+        
+        const [otherUser] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, otherUserId));
+
+        // Get unread message count
+        const [unreadCount] = await db
+          .select({ count: sql<number>`COUNT(*)` })
+          .from(messages)
+          .where(
+            and(
+              eq(messages.conversationId, conv.conversations.id),
+              eq(messages.isRead, false),
+              sql`${messages.senderId} != ${userId}`
+            )
+          );
+
+        return {
+          ...conv.conversations,
+          property: conv.properties!,
+          landlord: conv.conversations.landlordId === userId ? conv.users! : otherUser,
+          renter: conv.conversations.renterId === userId ? conv.users! : otherUser,
+          unreadCount: unreadCount.count,
+        } as ConversationWithDetails;
+      })
+    );
+
+    return conversationsWithDetails;
+  }
+
+  async getConversation(conversationId: number, userId: string): Promise<ConversationWithDetails | undefined> {
+    const [conversationData] = await db
+      .select()
+      .from(conversations)
+      .leftJoin(properties, eq(conversations.propertyId, properties.id))
+      .leftJoin(regions, eq(properties.regionId, regions.id))
+      .leftJoin(divisions, eq(properties.divisionId, divisions.id))
+      .where(
+        and(
+          eq(conversations.id, conversationId),
+          sql`(${conversations.landlordId} = ${userId} OR ${conversations.renterId} = ${userId})`
+        )
+      );
+
+    if (!conversationData) {
+      return undefined;
+    }
+
+    // Get landlord and renter details
+    const [landlord] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, conversationData.conversations.landlordId));
+
+    const [renter] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, conversationData.conversations.renterId));
+
+    // Get messages for this conversation
+    const conversationMessages = await this.getMessagesByConversation(conversationId);
+
+    return {
+      ...conversationData.conversations,
+      property: conversationData.properties!,
+      landlord,
+      renter,
+      messages: conversationMessages,
+    } as ConversationWithDetails;
+  }
+
+  async sendMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
+
+    // Update conversation's last message timestamp
+    await db
+      .update(conversations)
+      .set({ lastMessageAt: new Date() })
+      .where(eq(conversations.id, message.conversationId));
+
+    return newMessage;
+  }
+
+  async getMessagesByConversation(conversationId: number): Promise<MessageWithSender[]> {
+    const conversationMessages = await db
+      .select()
+      .from(messages)
+      .leftJoin(users, eq(messages.senderId, users.id))
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(desc(messages.createdAt));
+
+    return conversationMessages.map(msg => ({
+      ...msg.messages,
+      sender: msg.users!,
+    }));
+  }
+
+  async markMessagesAsRead(conversationId: number, userId: string): Promise<void> {
+    await db
+      .update(messages)
+      .set({ 
+        isRead: true, 
+        readAt: new Date() 
+      })
+      .where(
+        and(
+          eq(messages.conversationId, conversationId),
+          eq(messages.isRead, false),
+          sql`${messages.senderId} != ${userId}`
+        )
+      );
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    // Get all conversations for the user
+    const userConversationIds = await db
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(
+        and(
+          eq(conversations.isActive, true),
+          sql`(${conversations.landlordId} = ${userId} OR ${conversations.renterId} = ${userId})`
+        )
+      );
+
+    if (userConversationIds.length === 0) {
+      return 0;
+    }
+
+    const conversationIds = userConversationIds.map(c => c.id);
+
+    const [result] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(messages)
+      .where(
+        and(
+          inArray(messages.conversationId, conversationIds),
+          eq(messages.isRead, false),
+          sql`${messages.senderId} != ${userId}`
+        )
+      );
+
+    return result.count;
+  }
 }
 
 export const storage = new DatabaseStorage();
