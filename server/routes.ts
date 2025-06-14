@@ -219,6 +219,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Review routes
+  app.post('/api/properties/:id/reviews', async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: "Invalid property ID" });
+      }
+
+      const reviewData = insertReviewSchema.parse({
+        ...req.body,
+        propertyId,
+      });
+
+      const review = await storage.createReview(reviewData);
+      res.json(review);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid review data", errors: error.errors });
+      }
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  app.get('/api/properties/:id/reviews', async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: "Invalid property ID" });
+      }
+
+      const reviews = await storage.getReviewsByProperty(propertyId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.get('/api/properties/:id/rating-stats', async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ message: "Invalid property ID" });
+      }
+
+      const stats = await storage.getPropertyRatingStats(propertyId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching rating stats:", error);
+      res.status(500).json({ message: "Failed to fetch rating stats" });
+    }
+  });
+
+  app.delete('/api/reviews/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const reviewId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      if (isNaN(reviewId)) {
+        return res.status(400).json({ message: "Invalid review ID" });
+      }
+
+      await storage.deleteReview(reviewId, userId);
+      res.json({ message: "Review deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      res.status(500).json({ message: "Failed to delete review" });
+    }
+  });
+
   // Profile update routes
   app.put('/api/profile', isAuthenticated, async (req: any, res) => {
     try {

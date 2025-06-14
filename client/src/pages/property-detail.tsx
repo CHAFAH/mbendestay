@@ -3,6 +3,7 @@ import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
+import ReviewSection from "@/components/review-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -478,6 +479,11 @@ export default function PropertyDetail() {
             </Card>
           </div>
         )}
+
+        {/* Reviews Section */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ReviewSection propertyId={parseInt(id!)} />
+        </div>
       </div>
 
       <Footer />
