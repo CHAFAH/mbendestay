@@ -231,42 +231,61 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="bg-white/10 rounded-2xl p-6 mb-8">
-            <div className="grid md:grid-cols-2 gap-6 text-left">
-              <div>
-                <h4 className="font-semibold text-lg mb-3">Monthly Subscription</h4>
-                <div className="text-3xl font-bold text-accent mb-2">
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* Monthly Subscription */}
+            <div className="bg-white/10 rounded-2xl p-6 text-left">
+              <h4 className="font-semibold text-xl mb-3 text-center">Monthly Subscription</h4>
+              <div className="text-center mb-4">
+                <div className="text-4xl font-bold text-accent mb-2">
                   {SUBSCRIPTION_PLANS.monthly.price.toLocaleString()} XCFA
-                  <span className="text-lg font-normal text-white/80"> / month</span>
                 </div>
-                <ul className="space-y-2 text-white/90">
-                  {SUBSCRIPTION_PLANS.monthly.features.map((feature, index) => (
-                    <li key={index} className="flex items-center">
-                      <Check className="w-4 h-4 text-accent mr-2" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                <span className="text-lg text-white/80">per month</span>
               </div>
-              <div>
-                <h4 className="font-semibold text-lg mb-3">
-                  Yearly Subscription 
-                  <span className="bg-accent text-primary text-xs px-2 py-1 rounded-full ml-2">
-                    {SUBSCRIPTION_PLANS.yearly.savings}
-                  </span>
-                </h4>
-                <div className="text-3xl font-bold text-accent mb-2">
+              <ul className="space-y-3 text-white/90">
+                {SUBSCRIPTION_PLANS.monthly.features.map((feature, index) => (
+                  <li key={index} className="flex items-center">
+                    <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 text-center">
+                <Link href="/register-landlord">
+                  <Button className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30">
+                    Choose Monthly
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Yearly Subscription */}
+            <div className="bg-white/20 rounded-2xl p-6 text-left border-2 border-accent relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span className="bg-accent text-primary text-sm px-4 py-1 rounded-full font-semibold">
+                  {SUBSCRIPTION_PLANS.yearly.savings}
+                </span>
+              </div>
+              <h4 className="font-semibold text-xl mb-3 text-center">Yearly Subscription</h4>
+              <div className="text-center mb-4">
+                <div className="text-4xl font-bold text-accent mb-2">
                   {SUBSCRIPTION_PLANS.yearly.price.toLocaleString()} XCFA
-                  <span className="text-lg font-normal text-white/80"> / year</span>
                 </div>
-                <ul className="space-y-2 text-white/90">
-                  {SUBSCRIPTION_PLANS.yearly.features.map((feature, index) => (
-                    <li key={index} className="flex items-center">
-                      <Check className="w-4 h-4 text-accent mr-2" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                <span className="text-lg text-white/80">per year</span>
+              </div>
+              <ul className="space-y-3 text-white/90">
+                {SUBSCRIPTION_PLANS.yearly.features.map((feature, index) => (
+                  <li key={index} className="flex items-center">
+                    <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 text-center">
+                <Link href="/register-landlord">
+                  <Button className="w-full bg-accent hover:bg-accent/90 text-primary font-bold">
+                    Choose Yearly
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
