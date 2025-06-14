@@ -292,7 +292,7 @@ export default function LandlordDashboard() {
     return (
       <div className="min-h-screen bg-neutral-50">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20 py-8">
           <Skeleton className="h-8 w-64 mb-6" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {Array.from({ length: 4 }).map((_, i) => (

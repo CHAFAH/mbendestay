@@ -97,7 +97,7 @@ export default function BrowseProperties() {
       
       {/* Header */}
       <section className="py-8 bg-white border-b border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="font-bold text-3xl text-neutral-800">Browse Properties</h1>
@@ -120,10 +120,10 @@ export default function BrowseProperties() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
-          <div className={`lg:w-80 space-y-6 ${showFilters || 'hidden lg:block'}`}>
+          <div className={`lg:w-80 xl:w-96 space-y-6 ${showFilters || 'hidden lg:block'}`}>
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -271,7 +271,7 @@ export default function BrowseProperties() {
               </div>
             ) : properties && properties.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                   {properties.map((property: any) => (
                     <PropertyCard key={property.id} property={property} />
                   ))}
