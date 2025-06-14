@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Star, MapPin } from "lucide-react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import type { PropertyWithDetails } from "@shared/schema";
 
 interface PropertyCardProps {
@@ -10,6 +11,10 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property }: PropertyCardProps) {
+  const { data: ratingStats } = useQuery<{ averageRating: number; reviewCount: number }>({
+    queryKey: ["/api/properties", property.id, "rating-stats"],
+  });
+
   const formatPrice = (price: string | null) => {
     if (!price) return "Contact for price";
     return `₣${parseInt(price).toLocaleString()}`;
@@ -26,6 +31,23 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       default:
         return "bg-neutral-200 text-neutral-700";
     }
+  };
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-3 h-3 ${
+              star <= rating 
+                ? "fill-yellow-400 text-yellow-400" 
+                : "text-gray-300"
+            }`}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -58,10 +80,17 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-semibold text-xl text-neutral-800 line-clamp-2">{property.title}</h3>
-          <div className="flex items-center space-x-1 ml-2">
-            <Star className="w-4 h-4 text-accent fill-current" />
-            <span className="text-sm font-medium">4.8</span>
-          </div>
+          {ratingStats && ratingStats.reviewCount > 0 && (
+            <div className="flex items-center space-x-1 ml-2">
+              {renderStars(Math.round(ratingStats.averageRating))}
+              <span className="text-sm font-medium ml-1">
+                {ratingStats.averageRating.toFixed(1)}
+              </span>
+              <span className="text-xs text-neutral-500">
+                ({ratingStats.reviewCount})
+              </span>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center text-neutral-600 mb-3">
