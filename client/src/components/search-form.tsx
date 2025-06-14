@@ -27,7 +27,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
   // Fetch divisions when region changes
   const { data: divisions = [] } = useQuery({
     queryKey: [`/api/regions/${region}/divisions`],
-    enabled: !!region,
+    enabled: !!region && region !== "all",
   });
 
   // Reset division when region changes
@@ -70,9 +70,9 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
         {/* Division Filter */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-neutral-700">Division</Label>
-          <Select value={division} onValueChange={setDivision} disabled={!region}>
+          <Select value={division} onValueChange={setDivision} disabled={!region || region === "all"}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Division" />
+              <SelectValue placeholder={region && region !== "all" ? "Select Division" : "Select Region First"} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Divisions</SelectItem>
