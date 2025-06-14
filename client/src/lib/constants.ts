@@ -13,8 +13,11 @@ export const CAMEROON_REGIONS = [
 
 export const PROPERTY_TYPES = [
   { value: "apartment", label: "Apartment" },
-  { value: "guesthouse", label: "Guest House" },
+  { value: "guestHouse", label: "Guest House" },
   { value: "room", label: "Room" },
+  { value: "studio", label: "Studio" },
+  { value: "officeSpace", label: "Office Space" },
+  { value: "commercial", label: "Commercial" },
 ];
 
 export const CONTRACT_TYPES = [

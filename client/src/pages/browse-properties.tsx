@@ -192,7 +192,7 @@ export default function BrowseProperties() {
 
                 {/* Price Range */}
                 <div className="space-y-3">
-                  <Label className="font-medium">Price Range (XAF)</Label>
+                  <Label className="font-medium">Price Range (XCFA)</Label>
                   <div className="px-2">
                     <Slider
                       value={[filters.minPrice, filters.maxPrice]}
@@ -204,8 +204,8 @@ export default function BrowseProperties() {
                       className="w-full"
                     />
                     <div className="flex justify-between mt-2 text-sm text-neutral-600">
-                      <span>₣{filters.minPrice.toLocaleString()}</span>
-                      <span>₣{filters.maxPrice.toLocaleString()}</span>
+                      <span>XCFA {filters.minPrice.toLocaleString()}</span>
+                      <span>XCFA {filters.maxPrice.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

@@ -61,7 +61,7 @@ export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   description: text("description").notNull(),
-  propertyType: varchar("property_type").notNull(), // "apartment" | "guesthouse" | "room"
+  propertyType: varchar("property_type").notNull(), // "apartment" | "guestHouse" | "room" | "studio" | "officeSpace" | "commercial"
   contractType: varchar("contract_type").notNull(), // "short_stay" | "long_stay" | "daily" | "monthly"
   regionId: integer("region_id").notNull().references(() => regions.id),
   divisionId: integer("division_id").notNull().references(() => divisions.id),
@@ -173,6 +173,8 @@ export const insertPropertySchema = createInsertSchema(properties).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  propertyType: z.enum(["apartment", "guestHouse", "room", "studio", "officeSpace", "commercial"]),
 });
 
 export const insertInquirySchema = createInsertSchema(inquiries).omit({

@@ -121,7 +121,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
         {/* Price Range */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-neutral-700">
-            Price Range: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} FCFA
+            Price Range: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} XCFA
           </Label>
           <Slider
             value={priceRange}
