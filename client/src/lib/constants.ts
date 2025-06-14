@@ -148,6 +148,14 @@ export function useTranslation(lang: 'en' | 'fr' = 'en') {
         en: "Monthly Subscription",
         fr: "Abonnement Mensuel"
       },
+      featuredProperties: {
+        en: "Featured Properties",
+        fr: "Propriétés en Vedette"
+      },
+      featuredPropertiesDesc: {
+        en: "Discover our most popular accommodations, carefully selected for their quality, location, and exceptional host service.",
+        fr: "Découvrez nos hébergements les plus populaires, soigneusement sélectionnés pour leur qualité, leur emplacement et leur service d'hôte exceptionnel."
+      },
       yearlySubscription: {
         en: "Yearly Subscription",
         fr: "Abonnement Annuel"

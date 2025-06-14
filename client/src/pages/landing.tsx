@@ -118,10 +118,10 @@ export default function Landing() {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-bold text-4xl md:text-6xl text-white mb-6 leading-tight">
-            Find Your Perfect Stay in <span className="text-accent">Cameroon</span>
+            {t('heroTitle')}
           </h1>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Discover authentic accommodations across all 10 regions of Cameroon. From bustling cities to serene villages.
+            {t('heroSubtitle')}
           </p>
 
           <SearchForm onSearch={handleSearch} className="max-w-4xl mx-auto" />
