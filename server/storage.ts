@@ -4,6 +4,7 @@ import {
   regions,
   divisions,
   inquiries,
+  reviews,
   type User,
   type UpsertUser,
   type Property,
@@ -15,6 +16,9 @@ import {
   type Region,
   type Division,
   type Inquiry,
+  type Review,
+  type InsertReview,
+  type ReviewWithDetails,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, ilike, inArray, desc, sql } from "drizzle-orm";
@@ -41,6 +45,12 @@ export interface IStorage {
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
   getInquiriesByProperty(propertyId: number): Promise<Inquiry[]>;
   getInquiriesByLandlord(landlordId: string): Promise<Inquiry[]>;
+
+  // Review operations
+  createReview(review: InsertReview): Promise<Review>;
+  getReviewsByProperty(propertyId: number): Promise<ReviewWithDetails[]>;
+  getPropertyRatingStats(propertyId: number): Promise<{ averageRating: number; reviewCount: number }>;
+  deleteReview(reviewId: number, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -254,6 +264,53 @@ export class DatabaseStorage implements IStorage {
       .where(eq(properties.landlordId, landlordId))
       .orderBy(desc(inquiries.createdAt))
       .then(results => results.map(r => r.inquiry));
+  }
+
+  // Review operations
+  async createReview(review: InsertReview): Promise<Review> {
+    const [newReview] = await db
+      .insert(reviews)
+      .values(review)
+      .returning();
+    return newReview;
+  }
+
+  async getReviewsByProperty(propertyId: number): Promise<ReviewWithDetails[]> {
+    const result = await db
+      .select({
+        review: reviews,
+        reviewer: users,
+      })
+      .from(reviews)
+      .leftJoin(users, eq(reviews.reviewerId, users.id))
+      .where(eq(reviews.propertyId, propertyId))
+      .orderBy(desc(reviews.createdAt));
+
+    return result.map(r => ({
+      ...r.review,
+      reviewer: r.reviewer || undefined,
+    }));
+  }
+
+  async getPropertyRatingStats(propertyId: number): Promise<{ averageRating: number; reviewCount: number }> {
+    const [result] = await db
+      .select({
+        averageRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+        reviewCount: sql<number>`COUNT(${reviews.id})`,
+      })
+      .from(reviews)
+      .where(eq(reviews.propertyId, propertyId));
+    
+    return {
+      averageRating: Math.round(result.averageRating * 10) / 10,
+      reviewCount: result.reviewCount,
+    };
+  }
+
+  async deleteReview(reviewId: number, userId: string): Promise<void> {
+    await db
+      .delete(reviews)
+      .where(and(eq(reviews.id, reviewId), eq(reviews.reviewerId, userId)));
   }
 }
 

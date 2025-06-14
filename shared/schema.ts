@@ -215,6 +215,9 @@ export type PropertyWithDetails = Property & {
   landlord: User;
   region: typeof regions.$inferSelect;
   division: typeof divisions.$inferSelect;
+  reviews?: ReviewWithDetails[];
+  averageRating?: number;
+  reviewCount?: number;
 };
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
 export type UpdateProperty = z.infer<typeof updatePropertySchema>;
@@ -223,3 +226,8 @@ export type SearchProperties = z.infer<typeof searchPropertiesSchema>;
 export type Region = typeof regions.$inferSelect;
 export type Division = typeof divisions.$inferSelect;
 export type Inquiry = typeof inquiries.$inferSelect;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type ReviewWithDetails = Review & {
+  reviewer?: User;
+};

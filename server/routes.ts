@@ -6,6 +6,7 @@ import {
   insertPropertySchema,
   updatePropertySchema,
   insertInquirySchema,
+  insertReviewSchema,
   searchPropertiesSchema 
 } from "@shared/schema";
 import { z } from "zod";
