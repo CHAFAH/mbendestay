@@ -40,9 +40,9 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch({
-      region,
-      division,
-      propertyType,
+      regionId: region && region !== "all" ? parseInt(region) : undefined,
+      divisionId: division && division !== "all" ? parseInt(division) : undefined,
+      propertyType: propertyType !== "all" ? propertyType : undefined,
       checkIn,
       checkOut,
       minPrice: priceRange[0],

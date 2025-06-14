@@ -19,8 +19,8 @@ export default function BrowseProperties() {
   const [location] = useLocation();
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    region: "",
-    division: "",
+    regionId: undefined as number | undefined,
+    divisionId: undefined as number | undefined,
     propertyType: "",
     contractType: "",
     minPrice: 0,
@@ -35,8 +35,8 @@ export default function BrowseProperties() {
     const params = new URLSearchParams(location.split('?')[1] || '');
     setFilters(prev => ({
       ...prev,
-      region: params.get('region') || "",
-      division: params.get('division') || "",
+      regionId: params.get('regionId') ? parseInt(params.get('regionId')!) : undefined,
+      divisionId: params.get('divisionId') ? parseInt(params.get('divisionId')!) : undefined,
       propertyType: params.get('propertyType') || "",
       contractType: params.get('contractType') || "",
       page: parseInt(params.get('page') || '1'),
@@ -77,8 +77,8 @@ export default function BrowseProperties() {
 
   const clearFilters = () => {
     setFilters({
-      region: "",
-      division: "",
+      regionId: undefined,
+      divisionId: undefined,
       propertyType: "",
       contractType: "",
       minPrice: 0,
