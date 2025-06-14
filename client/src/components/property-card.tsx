@@ -16,7 +16,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   });
 
   const formatPrice = (price: string | null) => {
-    if (!price) return "Contact for price";
+    if (!price || price === "0") return "XCFA 0";
     return `XCFA ${parseInt(price).toLocaleString()}`;
   };
 
@@ -127,13 +127,29 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </p>
         
         <div className="flex items-center justify-between">
-          <div>
-            <span className="font-bold text-xl text-primary">
-              {formatPrice(property.pricePerNight)}
-            </span>
-            {property.pricePerNight && (
-              <span className="text-neutral-500 text-sm ml-1">per night</span>
-            )}
+          <div className="flex flex-col">
+            {property.pricePerNight && parseInt(property.pricePerNight) > 0 ? (
+              <div>
+                <span className="font-bold text-xl text-primary">
+                  {formatPrice(property.pricePerNight)}
+                </span>
+                <span className="text-neutral-500 text-sm ml-1">per night</span>
+              </div>
+            ) : null}
+            {property.pricePerMonth && parseInt(property.pricePerMonth) > 0 ? (
+              <div className={property.pricePerNight && parseInt(property.pricePerNight) > 0 ? "mt-1" : ""}>
+                <span className={`font-bold text-lg ${property.pricePerNight && parseInt(property.pricePerNight) > 0 ? "text-secondary" : "text-primary text-xl"}`}>
+                  {formatPrice(property.pricePerMonth)}
+                </span>
+                <span className="text-neutral-500 text-sm ml-1">per month</span>
+              </div>
+            ) : null}
+            {(!property.pricePerNight || parseInt(property.pricePerNight) === 0) && 
+             (!property.pricePerMonth || parseInt(property.pricePerMonth) === 0) ? (
+              <div>
+                <span className="font-bold text-xl text-primary">Contact for pricing</span>
+              </div>
+            ) : null}
           </div>
           <Link href={`/property/${property.id}`}>
             <Button className="bg-primary hover:bg-primary/90 text-white">

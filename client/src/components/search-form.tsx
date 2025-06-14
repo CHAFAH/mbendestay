@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -19,8 +20,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
   const [propertyType, setPropertyType] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+  const [priceRange, setPriceRange] = useState([10000, 1000000]);
 
   // Fetch regions
   const { data: regions = [] } = useQuery({
@@ -52,11 +52,11 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
     if (propertyType && propertyType !== "all" && propertyType !== "") {
       filters.propertyType = propertyType;
     }
-    if (minPrice && parseFloat(minPrice) > 0) {
-      filters.minPrice = parseFloat(minPrice);
+    if (priceRange[0] > 10000) {
+      filters.minPrice = priceRange[0];
     }
-    if (maxPrice && parseFloat(maxPrice) > 0) {
-      filters.maxPrice = parseFloat(maxPrice);
+    if (priceRange[1] < 1000000) {
+      filters.maxPrice = priceRange[1];
     }
     
     onSearch(filters);
@@ -121,35 +121,17 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
 
         {/* Price Range */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-neutral-700">Price Range (XCFA)</Label>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Input
-                type="number"
-                placeholder="Min price"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                min="0"
-                max="1000000"
-                step="1000"
-                className="text-sm"
-              />
-              <div className="text-xs text-neutral-500 mt-1">Min</div>
-            </div>
-            <div>
-              <Input
-                type="number"
-                placeholder="Max price"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                min="0"
-                max="1000000"
-                step="1000"
-                className="text-sm"
-              />
-              <div className="text-xs text-neutral-500 mt-1">Max (up to 1M)</div>
-            </div>
-          </div>
+          <Label className="text-sm font-medium text-neutral-700">
+            Price Range: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} XCFA
+          </Label>
+          <Slider
+            value={priceRange}
+            onValueChange={setPriceRange}
+            min={10000}
+            max={1000000}
+            step={10000}
+            className="w-full"
+          />
         </div>
 
         {/* Search Button */}
