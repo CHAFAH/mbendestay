@@ -78,7 +78,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
             <SelectTrigger className="w-full">
               <SelectValue placeholder={region && region !== "all" ? "Select Division" : "Select Region First"} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto">
               <SelectItem value="all">All Divisions</SelectItem>
               {divisions.map((d: any) => (
                 <SelectItem key={d.id} value={d.slug}>
