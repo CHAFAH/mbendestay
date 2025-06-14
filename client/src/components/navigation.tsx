@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, Search, Building, User, Menu, X } from "lucide-react";
+import { Home, Search, Building, User, Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ export default function Navigation() {
   const navItems = [
     { path: "/", label: "Home", icon: Home, public: true },
     { path: "/browse", label: "Browse Properties", icon: Search, public: true },
+    { path: "/messages", label: "Messages", icon: MessageCircle, public: false },
     { path: "/dashboard", label: "Dashboard", icon: Building, public: false },
   ];
 
