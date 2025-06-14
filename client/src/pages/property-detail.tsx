@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { PropertyWithDetails } from "@shared/schema";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import ReviewSection from "@/components/review-section";
@@ -46,7 +47,7 @@ export default function PropertyDetail() {
 
   const propertyId = parseInt(params.id as string);
 
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading } = useQuery<PropertyWithDetails>({
     queryKey: [`/api/properties/${propertyId}`],
     enabled: !!propertyId && !isNaN(propertyId),
   });
@@ -168,6 +169,44 @@ export default function PropertyDetail() {
     "Parking": Car,
     "Kitchen": Utensils,
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-96 bg-gray-200 rounded-xl"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-32 bg-gray-200 rounded"></div>
+              </div>
+              <div className="space-y-4">
+                <div className="h-64 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Property not found</h1>
+            <p className="text-gray-600 mb-4">The property you're looking for doesn't exist or has been removed.</p>
+            <Button onClick={() => window.history.back()}>Go Back</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -353,7 +392,7 @@ export default function PropertyDetail() {
                         />
                       ) : (
                         <span className="font-semibold text-neutral-600">
-                          {property.landlord.firstName?.[0] || property.landlord.email[0].toUpperCase()}
+                          {property.landlord.firstName?.[0] || property.landlord.email?.[0]?.toUpperCase() || 'H'}
                         </span>
                       )}
                     </div>
@@ -506,7 +545,7 @@ export default function PropertyDetail() {
 
         {/* Reviews Section */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ReviewSection propertyId={parseInt(id!)} />
+          <ReviewSection propertyId={propertyId} />
         </div>
       </div>
 
