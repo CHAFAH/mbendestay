@@ -163,7 +163,7 @@ export default function Landing() {
 
       {/* Regions Section */}
       <section className="py-16 bg-neutral-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
           <div className="text-center mb-12">
             <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
               Explore Cameroon's Regions
@@ -173,7 +173,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6">
             {regions.slice(0, 5).map((region: any) => (
               <div key={region.id} className="group cursor-pointer">
                 <div className="relative overflow-hidden rounded-xl mb-3">
@@ -196,7 +196,7 @@ export default function Landing() {
 
       {/* Landlord CTA */}
       <section className="py-16 bg-primary text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20 text-center">
           <div className="mb-8">
             <Building className="w-16 h-16 text-accent mx-auto mb-4" />
             <h2 className="font-bold text-3xl md:text-4xl mb-4">

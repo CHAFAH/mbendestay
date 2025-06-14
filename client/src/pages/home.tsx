@@ -50,7 +50,7 @@ export default function Home() {
       
       {/* Welcome Section */}
       <section className="py-12 bg-gradient-to-r from-primary to-primary/80 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
           <div className="text-center">
             <h1 className="font-bold text-3xl md:text-4xl mb-4">
               Welcome back, {user?.firstName || 'Friend'}!
@@ -79,7 +79,7 @@ export default function Home() {
       {/* Dashboard Cards for Landlords */}
       {isLandlord && (
         <section className="py-8 -mt-6 relative z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="shadow-lg">
                 <CardContent className="p-6 text-center">
@@ -147,7 +147,7 @@ export default function Home() {
 
       {/* Featured Properties */}
       <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
           <div className="text-center mb-12">
             <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
               Recommended for You
@@ -158,8 +158,8 @@ export default function Home() {
           </div>
 
           {featuredProperties?.properties && featuredProperties.properties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredProperties.properties.slice(0, 6).map((property: any) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
+              {featuredProperties.properties.slice(0, 10).map((property: any) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>
