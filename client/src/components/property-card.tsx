@@ -39,6 +39,25 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     }
   };
 
+  const getPropertyTypeLabel = (type: string) => {
+    switch (type) {
+      case "guestHouse":
+        return "Guest House";
+      case "officeSpace":
+        return "Office Space";
+      case "apartment":
+        return "Apartment";
+      case "room":
+        return "Room";
+      case "studio":
+        return "Studio";
+      case "commercial":
+        return "Commercial";
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  };
+
   const renderStars = (rating: number) => {
     return (
       <div className="flex items-center gap-1">
@@ -73,8 +92,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         
         <div className="absolute top-4 left-4">
           <Badge className={getPropertyTypeColor(property.propertyType)}>
-            {property.propertyType === "guesthouse" ? "Guest House" : 
-             property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)}
+            {getPropertyTypeLabel(property.propertyType)}
           </Badge>
         </div>
         

@@ -129,12 +129,37 @@ export default function PropertyDetail() {
     switch (type) {
       case "apartment":
         return "bg-accent text-accent-foreground";
-      case "guesthouse":
+      case "guestHouse":
         return "bg-secondary text-secondary-foreground";
       case "room":
         return "bg-primary text-primary-foreground";
+      case "studio":
+        return "bg-blue-500 text-white";
+      case "officeSpace":
+        return "bg-purple-500 text-white";
+      case "commercial":
+        return "bg-orange-500 text-white";
       default:
         return "bg-neutral-200 text-neutral-700";
+    }
+  };
+
+  const getPropertyTypeLabel = (type: string) => {
+    switch (type) {
+      case "guestHouse":
+        return "Guest House";
+      case "officeSpace":
+        return "Office Space";
+      case "apartment":
+        return "Apartment";
+      case "room":
+        return "Room";
+      case "studio":
+        return "Studio";
+      case "commercial":
+        return "Commercial";
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };
 
@@ -185,8 +210,7 @@ export default function PropertyDetail() {
                 <div>
                   <div className="flex items-center space-x-2 mb-2">
                     <Badge className={getPropertyTypeColor(property.propertyType)}>
-                      {property.propertyType === "guesthouse" ? "Guest House" : 
-                       property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)}
+                      {getPropertyTypeLabel(property.propertyType)}
                     </Badge>
                     <Badge variant="outline">{property.contractType.replace('_', ' ')}</Badge>
                   </div>
