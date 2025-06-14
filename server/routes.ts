@@ -57,8 +57,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/properties', async (req, res) => {
     try {
       const filters = searchPropertiesSchema.parse({
-        region: req.query.region,
-        division: req.query.division,
+        regionId: req.query.regionId ? parseInt(req.query.regionId as string) : undefined,
+        divisionId: req.query.divisionId ? parseInt(req.query.divisionId as string) : undefined,
         propertyType: req.query.propertyType,
         contractType: req.query.contractType,
         minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,

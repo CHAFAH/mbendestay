@@ -39,15 +39,26 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch({
-      regionId: region && region !== "all" ? parseInt(region) : undefined,
-      divisionId: division && division !== "all" ? parseInt(division) : undefined,
-      propertyType: propertyType !== "all" ? propertyType : undefined,
-      checkIn,
-      checkOut,
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-    });
+    const filters: any = {};
+    
+    // Only add filters if they have specific values (not "all" or empty)
+    if (region && region !== "all" && region !== "") {
+      filters.regionId = parseInt(region);
+    }
+    if (division && division !== "all" && division !== "") {
+      filters.divisionId = parseInt(division);
+    }
+    if (propertyType && propertyType !== "all" && propertyType !== "") {
+      filters.propertyType = propertyType;
+    }
+    if (priceRange[0] > 10000) {
+      filters.minPrice = priceRange[0];
+    }
+    if (priceRange[1] < 500000) {
+      filters.maxPrice = priceRange[1];
+    }
+    
+    onSearch(filters);
   };
 
   return (
