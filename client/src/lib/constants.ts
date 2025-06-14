@@ -46,27 +46,182 @@ export const SUBSCRIPTION_PLANS = {
   monthly: {
     price: 10000,
     duration: "month",
-    features: [
-      "Up to 5 property listings",
-      "Photo uploads",
-      "Guest messaging system",
-      "Chat support",
-      "Basic analytics",
-    ],
+    features: {
+      en: [
+        "Up to 5 property listings",
+        "Photo uploads",
+        "Guest messaging system",
+        "Chat support",
+        "Basic analytics",
+      ],
+      fr: [
+        "Jusqu'à 5 annonces de propriétés",
+        "Téléchargement de photos",
+        "Système de messagerie pour invités",
+        "Support par chat",
+        "Analyses de base",
+      ]
+    },
   },
   yearly: {
     price: 80000,
     duration: "year",
-    features: [
-      "Unlimited property listings",
-      "Photo & video uploads",
-      "Priority search placement",
-      "Advanced analytics dashboard",
-      "Contract templates",
-      "Guest messaging system",
-      "Chat support",
-      "Priority support",
-    ],
-    savings: "Save 33%",
+    features: {
+      en: [
+        "Unlimited property listings",
+        "Photo & video uploads",
+        "Priority search placement",
+        "Advanced analytics dashboard",
+        "Contract templates",
+        "Guest messaging system",
+        "Chat support",
+        "Priority support",
+      ],
+      fr: [
+        "Annonces de propriétés illimitées",
+        "Téléchargement de photos et vidéos",
+        "Placement prioritaire dans les recherches",
+        "Tableau de bord d'analyses avancées",
+        "Modèles de contrats",
+        "Système de messagerie pour invités",
+        "Support par chat",
+        "Support prioritaire",
+      ]
+    },
+    savings: {
+      en: "Save 33%",
+      fr: "Économisez 33%"
+    },
   },
 };
+
+// Simple translation function
+export function useTranslation(lang: 'en' | 'fr' = 'en') {
+  const t = (key: string): string => {
+    const translations: Record<string, Record<string, string>> = {
+      // Hero section
+      heroTitle: {
+        en: "Find Your Perfect Stay in Cameroon",
+        fr: "Trouvez Votre Séjour Parfait au Cameroun"
+      },
+      heroSubtitle: {
+        en: "Discover comfortable accommodations across all 10 regions with verified hosts and secure payments",
+        fr: "Découvrez des hébergements confortables dans les 10 régions avec des hôtes vérifiés et des paiements sécurisés"
+      },
+      searchPlaceholder: {
+        en: "Search by city, region, or property type...",
+        fr: "Rechercher par ville, région ou type de propriété..."
+      },
+      viewAllProperties: {
+        en: "View All Properties",
+        fr: "Voir Toutes les Propriétés"
+      },
+      exploreRegions: {
+        en: "Explore Cameroon's Regions",
+        fr: "Explorez les Régions du Cameroun"
+      },
+      exploreRegionsSubtitle: {
+        en: "From the coastal beauty of Littoral to the cultural richness of the West, discover accommodations across all 10 regions",
+        fr: "De la beauté côtière du Littoral à la richesse culturelle de l'Ouest, découvrez des hébergements dans les 10 régions"
+      },
+      listPropertyToday: {
+        en: "List Your Property Today",
+        fr: "Listez Votre Propriété Aujourd'hui"
+      },
+      verifiedListings: {
+        en: "Verified Listings",
+        fr: "Annonces Vérifiées"
+      },
+      verifiedListingsDesc: {
+        en: "All hosts are verified with national ID for guest safety and trust",
+        fr: "Tous les hôtes sont vérifiés avec une pièce d'identité nationale pour la sécurité et la confiance des clients"
+      },
+      mobilePayments: {
+        en: "Mobile Payments",
+        fr: "Paiements Mobiles"
+      },
+      mobilePaymentsDesc: {
+        en: "Accept payments via MTN, Orange Money, and bank transfers",
+        fr: "Acceptez les paiements via MTN, Orange Money et virements bancaires"
+      },
+      monthlySubscription: {
+        en: "Monthly Subscription",
+        fr: "Abonnement Mensuel"
+      },
+      yearlySubscription: {
+        en: "Yearly Subscription",
+        fr: "Abonnement Annuel"
+      },
+      chooseMonthly: {
+        en: "Choose Monthly",
+        fr: "Choisir Mensuel"
+      },
+      chooseYearly: {
+        en: "Choose Yearly",
+        fr: "Choisir Annuel"
+      },
+      perMonth: {
+        en: "per month",
+        fr: "par mois"
+      },
+      perYear: {
+        en: "per year",
+        fr: "par an"
+      },
+      startHostingToday: {
+        en: "Start Hosting Today",
+        fr: "Commencer l'Hébergement Aujourd'hui"
+      },
+      learnMore: {
+        en: "Learn More",
+        fr: "En Savoir Plus"
+      },
+      // Navigation
+      home: {
+        en: "Home",
+        fr: "Accueil"
+      },
+      browse: {
+        en: "Browse",
+        fr: "Parcourir"
+      },
+      messages: {
+        en: "Messages",
+        fr: "Messages"
+      },
+      dashboard: {
+        en: "Dashboard",
+        fr: "Tableau de bord"
+      },
+      // Property types
+      apartment: {
+        en: "Apartment",
+        fr: "Appartement"
+      },
+      guestHouse: {
+        en: "Guest House",
+        fr: "Maison d'Hôtes"
+      },
+      room: {
+        en: "Room",
+        fr: "Chambre"
+      },
+      studio: {
+        en: "Studio",
+        fr: "Studio"
+      },
+      officeSpace: {
+        en: "Office Space",
+        fr: "Espace de Bureau"
+      },
+      commercial: {
+        en: "Commercial",
+        fr: "Commercial"
+      }
+    };
+
+    return translations[key]?.[lang] || key;
+  };
+
+  return { t, lang };
+}

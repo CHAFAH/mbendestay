@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,15 +7,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLanguage } from "@/hooks/useLanguage";
-import { type Language } from "@/lib/translations";
 
-export default function LanguageSwitcher() {
+export function useLanguage() {
+  const [language, setLanguageState] = useState<'en' | 'fr'>('en');
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('language') as 'en' | 'fr';
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'fr')) {
+      setLanguageState(savedLanguage);
+    }
+  }, []);
+
+  const setLanguage = (lang: 'en' | 'fr') => {
+    setLanguageState(lang);
+    localStorage.setItem('language', lang);
+  };
+
+  return { language, setLanguage };
+}
+
+export default function SimpleLanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
 
   const languages = [
-    { code: 'en' as Language, name: 'English', flag: '🇺🇸' },
-    { code: 'fr' as Language, name: 'Français', flag: '🇫🇷' }
+    { code: 'en' as const, name: 'English', flag: '🇺🇸' },
+    { code: 'fr' as const, name: 'Français', flag: '🇫🇷' }
   ];
 
   const currentLanguage = languages.find(lang => lang.code === language);

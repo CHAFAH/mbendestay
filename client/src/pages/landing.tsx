@@ -4,6 +4,7 @@ import Navigation from "@/components/navigation";
 import SearchForm from "@/components/search-form";
 import PropertyCard from "@/components/property-card";
 import Footer from "@/components/footer";
+import SimpleLanguageSwitcher, { useLanguage } from "@/components/simple-language-switcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -17,7 +18,7 @@ import {
   Check
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { SUBSCRIPTION_PLANS } from "@/lib/constants";
+import { SUBSCRIPTION_PLANS, useTranslation } from "@/lib/constants";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
