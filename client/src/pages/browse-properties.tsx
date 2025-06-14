@@ -269,10 +269,10 @@ export default function BrowseProperties() {
                   </Card>
                 ))}
               </div>
-            ) : properties?.properties && properties.properties.length > 0 ? (
+            ) : properties && properties.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {properties.properties.map((property: any) => (
+                  {properties.map((property: any) => (
                     <PropertyCard key={property.id} property={property} />
                   ))}
                 </div>
