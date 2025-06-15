@@ -59,10 +59,16 @@ export default function Navigation() {
               </Link>
             ) : (
               <>
-                {(user as any)?.userType === "landlord" ? (
+                {(user as any)?.isAdmin ? (
+                  <Link href="/dashboard">
+                    <Button className="bg-primary text-white hover:bg-primary/90">
+                      List Property
+                    </Button>
+                  </Link>
+                ) : (user as any)?.userType === "landlord" ? (
                   <Link href="/dashboard">
                     <Button className="bg-green-600 text-white hover:bg-green-700">
-                      Manage Properties
+                      List Property
                     </Button>
                   </Link>
                 ) : (user as any)?.userType === "renter" ? (
@@ -72,9 +78,9 @@ export default function Navigation() {
                     </Button>
                   </Link>
                 ) : (
-                  <Link href="/dashboard">
-                    <Button className="bg-primary text-white hover:bg-primary/90">
-                      Dashboard
+                  <Link href="/register-landlord">
+                    <Button className="bg-orange-600 text-white hover:bg-orange-700">
+                      List Property
                     </Button>
                   </Link>
                 )}

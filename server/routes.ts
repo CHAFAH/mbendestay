@@ -182,7 +182,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
         const user = await storage.getUser(decoded.id);
         if (user) {
-          req.user = { ...user, isAdmin: user.email === ADMIN_EMAIL };
+          req.user = { 
+            id: user.id, 
+            email: user.email, 
+            isAdmin: user.email === ADMIN_EMAIL,
+            userType: user.userType,
+            subscriptionStatus: user.subscriptionStatus
+          };
           return next();
         }
       } catch (error) {
@@ -325,9 +331,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get properties by landlord
-  app.get('/api/landlord/properties', isAuthenticated, async (req: any, res) => {
+  app.get('/api/landlord/properties', authenticateUser, async (req: any, res) => {
     try {
-      const landlordId = req.user.claims.sub;
+      const landlordId = req.user.id;
       const properties = await storage.getPropertiesByLandlord(landlordId);
       res.json(properties);
     } catch (error) {
@@ -337,9 +343,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create property
-  app.post('/api/properties', isAuthenticated, async (req: any, res) => {
+  app.post('/api/properties', authenticateUser, async (req: any, res) => {
     try {
-      const landlordId = req.user.claims.sub;
+      const landlordId = req.user.id;
       const validatedData = insertPropertySchema.parse(req.body);
       
       const property = await storage.createProperty({
@@ -429,9 +435,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all inquiries for landlord
-  app.get('/api/landlord/inquiries', isAuthenticated, async (req: any, res) => {
+  app.get('/api/landlord/inquiries', authenticateUser, async (req: any, res) => {
     try {
-      const landlordId = req.user.claims.sub;
+      const landlordId = req.user.id;
       const inquiries = await storage.getInquiriesByLandlord(landlordId);
       res.json(inquiries);
     } catch (error) {

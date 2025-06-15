@@ -318,23 +318,27 @@ export default function LandlordDashboard() {
     );
   }
 
-  if (!user || user.subscriptionStatus !== 'active') {
+  // Check if user needs subscription (admin users bypass this)
+  if (!user || (!user.isAdmin && user.userType !== "landlord" && user.subscriptionStatus !== 'active')) {
     return (
       <div className="min-h-screen bg-neutral-50">
         <Navigation />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <AlertCircle className="w-16 h-16 text-secondary mx-auto mb-6" />
           <h1 className="font-bold text-3xl text-neutral-800 mb-4">
-            Active Subscription Required
+            {user?.userType === "renter" ? "Subscription Required" : "Landlord Access Required"}
           </h1>
           <p className="text-lg text-neutral-600 mb-8">
-            You need an active subscription to access the landlord dashboard and manage properties.
+            {user?.userType === "renter" 
+              ? "You need an active subscription to access property management features."
+              : "You need to register as a landlord to access the property management dashboard."
+            }
           </p>
           <Button 
-            onClick={() => window.location.href = "/register-landlord"}
+            onClick={() => window.location.href = user?.userType === "renter" ? "/subscribe" : "/register-landlord"}
             className="bg-primary hover:bg-primary/90 text-white"
           >
-            Get Subscription
+            {user?.userType === "renter" ? "Subscribe Now" : "Become a Landlord"}
           </Button>
         </div>
       </div>
