@@ -152,11 +152,11 @@ export default function Landing() {
                 <p className="text-neutral-600">Search and rent properties across Cameroon</p>
               </div>
               <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-green-600 mb-2">FREE</div>
-                <span className="text-lg text-neutral-600">Always free to browse</span>
+                <div className="text-4xl font-bold text-green-600 mb-2">10,000 FCFA</div>
+                <span className="text-lg text-neutral-600">Per month</span>
               </div>
               <ul className="space-y-3 text-neutral-700 mb-6">
-                {SUBSCRIPTION_PLANS.renter_free.features[language].map((feature, index) => (
+                {SUBSCRIPTION_PLANS.renter_monthly.features[language].map((feature, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="w-4 h-4 text-green-600 mr-3 flex-shrink-0" />
                     <span>{feature}</span>
@@ -164,9 +164,9 @@ export default function Landing() {
                 ))}
               </ul>
               <div className="text-center">
-                <Link href="/browse">
+                <Link href="/subscribe">
                   <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold">
-                    Start Browsing
+                    Subscribe to Browse
                   </Button>
                 </Link>
               </div>

@@ -48,74 +48,76 @@ export const AMENITIES = [
 export const SUBSCRIPTION_PLANS = {
   // For landlords to list properties
   landlord_monthly: {
-    price: 10000,
+    price: 15000,
     duration: "month",
     type: "landlord",
-    listingDuration: 2, // months
+    listingDuration: 1, // month
     features: {
       en: [
-        "List properties for 2 months",
-        "Up to 10 property listings",
+        "List unlimited properties",
         "Photo and video uploads",
         "Tenant messaging system",
         "Basic property analytics",
+        "Monthly subscription",
       ],
       fr: [
-        "Lister les propriétés pendant 2 mois",
-        "Jusqu'à 10 annonces de propriétés",
+        "Lister des propriétés illimitées",
         "Téléchargement de photos et vidéos",
         "Système de messagerie locataires",
         "Analyses de base des propriétés",
+        "Abonnement mensuel",
       ]
     },
   },
   landlord_yearly: {
-    price: 80000,
+    price: 150000,
     duration: "year",
     type: "landlord",
     listingDuration: 12, // months
     features: {
       en: [
-        "List properties for 12 months",
-        "Unlimited property listings",
-        "Premium photo and video uploads",
-        "Priority tenant messaging",
+        "List unlimited properties",
+        "Priority listing placement",
         "Advanced property analytics",
-        "Featured listings boost",
+        "Tenant messaging system",
+        "Photo and video uploads",
+        "Yearly subscription savings",
       ],
       fr: [
-        "Lister les propriétés pendant 12 mois",
-        "Annonces de propriétés illimitées",
-        "Téléchargements premium photos/vidéos",
-        "Messagerie locataires prioritaire",
+        "Lister des propriétés illimitées",
+        "Placement d'annonce prioritaire",
         "Analyses avancées des propriétés",
-        "Boost des annonces en vedette",
+        "Système de messagerie locataires",
+        "Téléchargement de photos et vidéos",
+        "Économies d'abonnement annuel",
       ]
     },
     savings: {
-      en: "Save 33%",
-      fr: "Économisez 33%"
+      en: "Save 17%",
+      fr: "Économisez 17%"
     },
   },
-  // For renters to search properties (free)
-  renter_free: {
-    price: 0,
-    duration: "unlimited",
+  // For renters to browse properties (paid)
+  renter_monthly: {
+    price: 10000,
+    duration: "month",
     type: "renter",
     features: {
       en: [
         "Browse all properties",
         "Contact landlords directly",
+        "Advanced search filters",
         "Save favorite properties",
-        "Basic search filters",
-        "Property comparison",
+        "Property alerts and notifications",
+        "Premium support",
       ],
       fr: [
         "Parcourir toutes les propriétés",
         "Contacter directement les propriétaires",
+        "Filtres de recherche avancés",
         "Sauvegarder les propriétés favorites",
-        "Filtres de recherche de base",
-        "Comparaison de propriétés",
+        "Alertes et notifications de propriétés",
+        "Support premium",
       ]
     },
   },
