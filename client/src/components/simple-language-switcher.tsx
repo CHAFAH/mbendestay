@@ -21,6 +21,8 @@ export function useLanguage() {
   const setLanguage = (lang: 'en' | 'fr') => {
     setLanguageState(lang);
     localStorage.setItem('language', lang);
+    // Force page refresh to update all translations
+    window.location.reload();
   };
 
   return { language, setLanguage };
