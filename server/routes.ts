@@ -283,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/properties', async (req, res) => {
     try {
       // Handle amenities parameter conversion from string to array
-      const query = { ...req.query };
+      const query: any = { ...req.query };
       if (query.amenities && typeof query.amenities === 'string') {
         try {
           query.amenities = JSON.parse(query.amenities);

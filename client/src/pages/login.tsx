@@ -39,18 +39,43 @@ export default function Login() {
         localStorage.setItem("auth_token", data.token);
       }
       
-      if (data.user?.subscriptionStatus === "active") {
+      const user = data.user;
+      
+      // Admin users bypass subscription
+      if (user.isAdmin) {
         toast({
-          title: "Welcome back!",
-          description: "Successfully signed in to your account.",
+          title: "Welcome back, Admin!",
+          description: "You have full access to all features.",
         });
         setLocation("/");
-      } else {
+        return;
+      }
+      
+      // Landlords don't need subscription - they can list properties for free
+      if (user.userType === "landlord") {
         toast({
           title: "Welcome back!",
-          description: "Please choose a subscription plan to access property details.",
+          description: "Ready to manage your properties.",
         });
-        setLocation("/subscribe");
+        setLocation("/dashboard");
+        return;
+      }
+      
+      // Renters need subscription to access property details
+      if (user.userType === "renter") {
+        if (user.subscriptionStatus === "active") {
+          toast({
+            title: "Welcome back!",
+            description: "Your subscription is active.",
+          });
+          setLocation("/");
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "Subscribe to access property details and contact landlords.",
+          });
+          setLocation("/subscribe");
+        }
       }
     },
     onError: (error: Error) => {

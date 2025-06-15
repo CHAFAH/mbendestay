@@ -23,12 +23,30 @@ export default function Subscribe() {
   const { toast } = useToast();
   const { user, isLoading } = useAuth();
 
-  // Redirect admin users away from subscription page
+  // Redirect non-renter users away from subscription page
   useEffect(() => {
-    if (!isLoading && user && (user as any).isAdmin) {
-      setLocation("/");
+    if (!isLoading && user) {
+      const userData = user as any;
+      // Admin users bypass subscription
+      if (userData.isAdmin) {
+        setLocation("/");
+        return;
+      }
+      // Landlords don't need subscription - redirect to dashboard
+      if (userData.userType === "landlord") {
+        toast({
+          title: "No subscription needed",
+          description: "Landlords can list properties for free.",
+        });
+        setLocation("/dashboard");
+        return;
+      }
+      // Only renters should see subscription page
+      if (userData.userType !== "renter") {
+        setLocation("/");
+      }
     }
-  }, [user, isLoading, setLocation]);
+  }, [user, isLoading, setLocation, toast]);
 
   const form = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
@@ -74,10 +92,13 @@ export default function Subscribe() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-neutral-800 mb-4">
-            Choose Your Subscription Plan
+            Renter Subscription Plan
           </h1>
           <p className="text-lg text-neutral-600">
-            Unlock detailed property information, landlord contact details, and precise locations
+            Access detailed property information, landlord contact details, and precise locations across Cameroon
+          </p>
+          <p className="text-sm text-blue-600 mt-2">
+            Only 10,000 FCFA/month - Find your perfect accommodation
           </p>
         </div>
 
