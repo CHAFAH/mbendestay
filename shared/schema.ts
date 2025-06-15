@@ -286,16 +286,16 @@ export const updateUserSchema = insertUserSchema.partial();
 export const updatePropertySchema = insertPropertySchema.partial();
 
 export const searchPropertiesSchema = z.object({
-  regionId: z.number().optional(),
-  divisionId: z.number().optional(),
+  regionId: z.coerce.number().optional(),
+  divisionId: z.coerce.number().optional(),
   propertyType: z.string().optional(),
   contractType: z.string().optional(),
-  minPrice: z.number().optional(),
-  maxPrice: z.number().optional(),
-  rooms: z.number().optional(),
+  minPrice: z.coerce.number().optional(),
+  maxPrice: z.coerce.number().optional(),
+  rooms: z.coerce.number().optional(),
   amenities: z.array(z.string()).optional(),
-  page: z.number().default(1),
-  limit: z.number().default(12),
+  page: z.coerce.number().default(1),
+  limit: z.coerce.number().default(12),
 });
 
 // Types

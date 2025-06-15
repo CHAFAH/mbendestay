@@ -70,9 +70,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const now = new Date();
       const subscriptionEndDate = new Date(now);
       
-      if (validatedData.plan === 'monthly') {
+      if (validatedData.type === 'monthly') {
         subscriptionEndDate.setMonth(now.getMonth() + 1);
-      } else if (validatedData.plan === 'yearly') {
+      } else if (validatedData.type === 'yearly') {
         subscriptionEndDate.setFullYear(now.getFullYear() + 1);
       }
 
@@ -84,8 +84,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: req.user.claims.last_name,
         profileImageUrl: req.user.claims.profile_image_url,
         subscriptionStatus: 'active',
-        subscriptionPlan: validatedData.plan,
-        subscriptionEndDate: subscriptionEndDate,
+        subscriptionType: validatedData.type,
+        subscriptionExpiresAt: subscriptionEndDate,
       });
 
       res.json({
@@ -96,8 +96,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
           subscriptionStatus: updatedUser.subscriptionStatus,
-          subscriptionPlan: updatedUser.subscriptionPlan,
-          subscriptionEndDate: updatedUser.subscriptionEndDate,
+          subscriptionType: updatedUser.subscriptionType,
+          subscriptionEndDate: updatedUser.subscriptionExpiresAt,
           isAdmin: false
         }
       });
