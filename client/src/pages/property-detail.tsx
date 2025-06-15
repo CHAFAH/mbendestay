@@ -39,7 +39,8 @@ import {
   WashingMachine,
   TreePine,
   Shield,
-  Zap
+  Zap,
+  Crown
 } from "lucide-react";
 import { AMENITIES } from "@/lib/constants";
 

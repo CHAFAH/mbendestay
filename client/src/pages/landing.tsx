@@ -172,85 +172,7 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* For Landlords - Monthly */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200">
-              <div className="text-center mb-6">
-                <Building className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h3 className="font-bold text-2xl text-neutral-800 mb-2">Monthly Plan</h3>
-                <p className="text-neutral-600">List properties for 2 months</p>
-              </div>
-              <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-primary mb-2">10,000 FCFA</div>
-                <span className="text-lg text-neutral-600">Per month</span>
-              </div>
-              <ul className="space-y-3 text-neutral-700 mb-6">
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Properties listed for 2 months</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Photo & video uploads</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Direct tenant messaging</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Basic property analytics</span>
-                </li>
-              </ul>
-              <div className="text-center">
-                <Link href="/landlord-subscribe">
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold">
-                    Choose Monthly
-                  </Button>
-                </Link>
-              </div>
-            </div>
 
-            {/* For Landlords - Yearly */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-green-600 text-white px-4 py-1 rounded-full text-sm font-medium">Best Value</span>
-              </div>
-              <div className="text-center mb-6">
-                <Building className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h3 className="font-bold text-2xl text-neutral-800 mb-2">Yearly Plan</h3>
-                <p className="text-neutral-600">List properties for 12 months</p>
-              </div>
-              <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-primary mb-2">80,000 FCFA</div>
-                <span className="text-lg text-neutral-600">Per year</span>
-                <div className="text-sm text-green-600 font-medium mt-1">Save 40,000 FCFA</div>
-              </div>
-              <ul className="space-y-3 text-neutral-700 mb-6">
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Properties listed for 12 months</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Priority listing placement</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Photo & video uploads</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Advanced property analytics</span>
-                </li>
-              </ul>
-              <div className="text-center">
-                <Link href="/landlord-subscribe">
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold">
-                    Choose Yearly
-                  </Button>
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -384,64 +306,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {/* Monthly Subscription */}
-            <div className="bg-white/10 rounded-2xl p-6 text-left">
-              <h4 className="font-semibold text-xl mb-3 text-center">Monthly Plan</h4>
-              <div className="text-center mb-4">
-                <div className="text-4xl font-bold text-accent mb-2">
-                  {SUBSCRIPTION_PLANS.landlord_monthly.price.toLocaleString()} FCFA
-                </div>
-                <span className="text-lg text-white/80">per month</span>
-              </div>
-              <ul className="space-y-3 text-white/90">
-                {SUBSCRIPTION_PLANS.landlord_monthly.features[language].map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 text-center">
-                <Link href="/register-landlord">
-                  <Button className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30">
-                    Choose Monthly
-                  </Button>
-                </Link>
-              </div>
-            </div>
 
-            {/* Yearly Subscription */}
-            <div className="bg-white/20 rounded-2xl p-6 text-left border-2 border-accent relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-accent text-primary text-sm px-4 py-1 rounded-full font-semibold">
-                  {SUBSCRIPTION_PLANS.landlord_yearly.savings[language]}
-                </span>
-              </div>
-              <h4 className="font-semibold text-xl mb-3 text-center">Yearly Plan</h4>
-              <div className="text-center mb-4">
-                <div className="text-4xl font-bold text-accent mb-2">
-                  {SUBSCRIPTION_PLANS.landlord_yearly.price.toLocaleString()} FCFA
-                </div>
-                <span className="text-lg text-white/80">per year</span>
-              </div>
-              <ul className="space-y-3 text-white/90">
-                {SUBSCRIPTION_PLANS.landlord_yearly.features[language].map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 text-center">
-                <Link href="/register-landlord">
-                  <Button className="w-full bg-accent hover:bg-accent/90 text-primary font-bold">
-                    Choose Yearly
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
 
           <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
             <Link href="/register-landlord">
