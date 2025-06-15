@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PropertyWithDetails } from "@shared/schema";
 import Navigation from "@/components/navigation";
@@ -11,9 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   MapPin, 
   Star, 
@@ -45,6 +47,8 @@ export default function PropertyDetail() {
   const params = useParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({
     guestName: "",
@@ -58,7 +62,7 @@ export default function PropertyDetail() {
 
   const propertyId = parseInt(params.id as string);
 
-  const { data: property, isLoading } = useQuery<PropertyWithDetails>({
+  const { data: property, isLoading } = useQuery<any>({
     queryKey: [`/api/properties/${propertyId}`],
     enabled: !!propertyId && !isNaN(propertyId),
   });
@@ -260,6 +264,24 @@ export default function PropertyDetail() {
                 </div>
               </div>
             </div>
+
+            {/* Subscription Warning */}
+            {property?.subscriptionRequired && (
+              <Alert className="border-amber-200 bg-amber-50">
+                <Crown className="h-4 w-4 text-amber-600" />
+                <AlertTitle className="text-amber-800">Subscription Required</AlertTitle>
+                <AlertDescription className="text-amber-700">
+                  {property.message || "Subscribe to view complete property details including landlord contact information and exact address."}
+                  <Button 
+                    className="ml-4 bg-amber-600 hover:bg-amber-700" 
+                    size="sm"
+                    onClick={() => setLocation('/subscribe')}
+                  >
+                    Subscribe Now
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Description */}
             <Card>
