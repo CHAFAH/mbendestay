@@ -52,7 +52,7 @@ export default function Navigation() {
             })}
             
             {!isAuthenticated ? (
-              <Link href="/register-landlord">
+              <Link href="/login">
                 <Button className="bg-primary text-white hover:bg-primary/90">
                   List Your Property
                 </Button>

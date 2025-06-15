@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authenticateToken, hashPassword, comparePassword, generateJWT } from "./auth";
+import jwt from "jsonwebtoken";
 
 // Admin account that bypasses subscription requirements
 const ADMIN_EMAIL = "sani.ray.red@gmail.com";
@@ -110,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
         const token = authHeader.substring(7);
-        const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
         const user = await storage.getUser(decoded.id);
         
         if (user) {
@@ -165,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
         const token = authHeader.substring(7);
-        const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
         const user = await storage.getUser(decoded.id);
         if (user) {
           req.user = { ...user, isAdmin: user.email === ADMIN_EMAIL };
