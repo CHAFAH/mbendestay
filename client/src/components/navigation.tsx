@@ -98,15 +98,20 @@ export default function Navigation() {
                 </a>
               </div>
             ) : (
-              <a 
-                href="/api/login"
-                className="flex items-center space-x-2 text-neutral-600 hover:text-primary transition-colors bg-neutral-50 hover:bg-neutral-100 px-4 py-2 rounded-full border border-neutral-200"
-              >
-                <div className="w-10 h-10 bg-gradient-to-r from-primary to-primary/80 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <span className="hidden md:inline text-sm font-medium">{t('signIn')}</span>
-              </a>
+              <div className="flex items-center space-x-3">
+                <Link 
+                  href="/login"
+                  className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors px-3 py-2 hover:bg-neutral-50 rounded-md"
+                >
+                  {t('signIn')}
+                </Link>
+                <Link 
+                  href="/signup"
+                  className="text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors px-4 py-2 rounded-md"
+                >
+                  {t('signUp')}
+                </Link>
+              </div>
             )}
             
             <button 

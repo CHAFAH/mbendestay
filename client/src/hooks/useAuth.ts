@@ -10,9 +10,14 @@ export function useAuth() {
       if (!token) return null;
       
       try {
-        return await apiRequest("GET", "/api/auth/me", undefined, {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await fetch("/api/auth/user", {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
+        if (!response.ok) throw new Error('Not authenticated');
+        return response.json();
       } catch {
         localStorage.removeItem("auth_token");
         return null;

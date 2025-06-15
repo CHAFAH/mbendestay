@@ -187,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: req.user.claims.profile_image_url,
         subscriptionStatus: 'active',
         subscriptionType: validatedData.type,
-        subscriptionEndDate: subscriptionEndDate,
+        subscriptionExpiresAt: subscriptionEndDate,
       });
 
       res.json({
