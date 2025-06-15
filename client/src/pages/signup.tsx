@@ -30,6 +30,10 @@ export default function Signup() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Get redirect parameter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectTo = urlParams.get('redirect') || '/';
 
   const form = useForm<SignupForm>({
     resolver: zodResolver(clientSignupSchema),
@@ -66,11 +70,16 @@ export default function Signup() {
         description: "Please sign in to continue.",
       });
       
-      // Redirect based on subscription type
-      if (variables.userType === "landlord" || variables.userType === "landlord_yearly") {
-        setLocation("/landlord-subscribe");
+      // Redirect to login with the original redirect parameter
+      if (redirectTo !== '/') {
+        setLocation(`/login?redirect=${encodeURIComponent(redirectTo)}`);
       } else {
-        setLocation("/subscribe");
+        // Default behavior based on subscription type
+        if (variables.userType === "landlord" || variables.userType === "landlord_yearly") {
+          setLocation("/landlord-subscribe");
+        } else {
+          setLocation("/subscribe");
+        }
       }
     },
     onError: (error: Error) => {

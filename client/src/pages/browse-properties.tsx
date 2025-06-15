@@ -67,12 +67,16 @@ export default function BrowseProperties() {
             </div>
             <div className="space-y-4">
               {!isAuthenticated ? (
-                <Button 
-                  onClick={() => window.location.href = "/api/login"}
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
-                >
-                  Login to Subscribe
-                </Button>
+                <div className="space-y-3">
+                  <Link href="/login?redirect=/browse">
+                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-3">
+                      Login to Subscribe
+                    </Button>
+                  </Link>
+                  <p className="text-sm text-neutral-600">
+                    Don't have an account? <Link href="/signup?redirect=/browse" className="text-green-600 hover:underline">Sign up here</Link>
+                  </p>
+                </div>
               ) : (
                 <Link href="/subscribe">
                   <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3">

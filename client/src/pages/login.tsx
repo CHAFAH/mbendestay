@@ -20,6 +20,10 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  
+  // Get redirect parameter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectTo = urlParams.get('redirect') || '/';
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -48,12 +52,12 @@ export default function Login() {
       const user = data.user;
       
       // Admin users bypass subscription
-      if (user.isAdmin) {
+      if (user.isAdmin || user.email === 'sani.ray.red@gmail.com') {
         toast({
           title: "Welcome back, Admin!",
           description: "You have full access to all features.",
         });
-        setLocation("/");
+        setLocation(redirectTo);
         return;
       }
       
@@ -63,7 +67,7 @@ export default function Login() {
           title: "Welcome back!",
           description: "Ready to manage your properties.",
         });
-        setLocation("/dashboard");
+        setLocation(user.userType === "landlord" && redirectTo === "/" ? "/dashboard" : redirectTo);
         return;
       }
       
@@ -74,7 +78,7 @@ export default function Login() {
             title: "Welcome back!",
             description: "Your subscription is active.",
           });
-          setLocation("/");
+          setLocation(redirectTo);
         } else {
           toast({
             title: "Welcome back!",
