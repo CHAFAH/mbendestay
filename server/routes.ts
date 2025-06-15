@@ -154,8 +154,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user is authenticated and has subscription/admin access
       let hasFullAccess = false;
       if (req.user) {
-        const userEmail = req.user.claims?.email;
-        const userId = req.user.claims?.sub;
+        const userEmail = (req.user as any).claims?.email;
+        const userId = (req.user as any).claims?.sub;
         
         if (userEmail === ADMIN_EMAIL) {
           hasFullAccess = true;

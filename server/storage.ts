@@ -243,17 +243,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProperty(property: InsertProperty): Promise<Property> {
+    // Ensure amenities is properly formatted as an array
+    const propertyData = {
+      ...property,
+      amenities: Array.isArray(property.amenities) ? property.amenities : []
+    };
+    
     const [newProperty] = await db
       .insert(properties)
-      .values([property])
+      .values([propertyData])
       .returning();
     return newProperty;
   }
 
   async updateProperty(id: number, data: UpdateProperty): Promise<Property> {
+    const updateData = { 
+      ...data, 
+      updatedAt: new Date()
+    };
+    // Ensure amenities is an array if provided
+    if (updateData.amenities && !Array.isArray(updateData.amenities)) {
+      updateData.amenities = [];
+    }
+    if (updateData.amenities) {
+      updateData.amenities = Array.isArray(updateData.amenities) ? updateData.amenities : [];
+    }
+    
     const [property] = await db
       .update(properties)
-      .set({ ...data, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(properties.id, id))
       .returning();
     return property;
