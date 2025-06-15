@@ -405,16 +405,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const query: any = { ...req.query };
       if (query.amenities) {
         if (typeof query.amenities === 'string') {
-          try {
-            query.amenities = JSON.parse(query.amenities);
-          } catch {
-            query.amenities = query.amenities.split(',').filter(Boolean);
+          if (query.amenities.trim() === '') {
+            delete query.amenities;
+          } else {
+            try {
+              query.amenities = JSON.parse(query.amenities);
+            } catch {
+              query.amenities = query.amenities.split(',').filter(Boolean);
+            }
           }
         } else if (Array.isArray(query.amenities)) {
           // Already an array, keep as is
         } else {
           delete query.amenities; // Remove invalid amenities parameter
         }
+      }
+      
+      // Ensure amenities is either undefined or an array
+      if (query.amenities !== undefined && !Array.isArray(query.amenities)) {
+        delete query.amenities;
       }
       
       const filters = searchPropertiesSchema.parse(query);

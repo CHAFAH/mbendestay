@@ -52,12 +52,14 @@ export default function Login() {
       const user = data.user;
       
       // Admin users bypass subscription
-      if (user.isAdmin || user.email === 'sani.ray.red@gmail.com') {
+      if (user.isAdmin || user.email === 'sani.ray.red@gmail.com' || user.subscriptionStatus === 'admin') {
         toast({
           title: "Welcome back, Admin!",
           description: "You have full access to all features.",
         });
-        setLocation(redirectTo);
+        // For admin users coming from browse page, redirect to browse
+        const targetLocation = redirectTo === '/browse' ? '/browse' : '/';
+        setLocation(targetLocation);
         return;
       }
       
@@ -67,7 +69,9 @@ export default function Login() {
           title: "Welcome back!",
           description: "Ready to manage your properties.",
         });
-        setLocation(user.userType === "landlord" && redirectTo === "/" ? "/dashboard" : redirectTo);
+        const targetLocation = redirectTo === '/browse' ? '/browse' : 
+                              redirectTo === '/' ? '/dashboard' : redirectTo;
+        setLocation(targetLocation);
         return;
       }
       
@@ -86,7 +90,15 @@ export default function Login() {
           });
           setLocation("/subscribe");
         }
+        return;
       }
+      
+      // Default fallback for any other user types
+      toast({
+        title: "Welcome back!",
+        description: "Login successful.",
+      });
+      setLocation(redirectTo);
     },
     onError: (error: Error) => {
       toast({
