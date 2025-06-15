@@ -180,10 +180,6 @@ export function useTranslation(lang: 'en' | 'fr' = 'en') {
         en: "Explore Properties",
         fr: "Explorer les Propriétés"
       },
-      viewAllRegionsProperties: {
-        en: "View All Regions & Properties",
-        fr: "Voir Toutes les Régions et Propriétés"
-      },
       chooseMonthly: {
         en: "Choose Monthly",
         fr: "Choisir Mensuel"
