@@ -35,24 +35,23 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<SignupForm>({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(clientSignupSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
+      username: "",
       email: "",
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
+      userType: "renter",
+      phoneNumber: ""
     }
   });
 
   const signupMutation = useMutation({
     mutationFn: async (data: SignupForm) => {
-      const response = await apiRequest("POST", "/api/auth/signup", {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password
-      });
+      const { confirmPassword, ...signupData } = data;
+      const response = await apiRequest("POST", "/api/auth/signup", signupData);
       return response.json();
     },
     onSuccess: () => {
