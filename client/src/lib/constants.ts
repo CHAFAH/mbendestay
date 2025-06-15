@@ -40,6 +40,9 @@ export const AMENITIES = [
   "Garden",
   "Security",
   "Generator",
+  "Water Included",
+  "Electricity Included",
+  "Shared Accommodation",
 ];
 
 export const SUBSCRIPTION_PLANS = {

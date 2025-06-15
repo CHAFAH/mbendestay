@@ -77,6 +77,7 @@ export const properties = pgTable("properties", {
   pricePerMonth: decimal("price_per_month", { precision: 10, scale: 2 }),
   rooms: integer("rooms"),
   size: integer("size"), // in square meters
+  maxTenants: integer("max_tenants"),
   amenities: jsonb("amenities").$type<string[]>(),
   images: jsonb("images").$type<string[]>(),
   videoUrl: varchar("video_url"),

@@ -55,6 +55,7 @@ export default function LandlordDashboard() {
     pricePerMonth: "",
     rooms: "",
     size: "",
+    maxTenants: "",
     amenities: [] as string[],
     images: [] as string[],
     videoUrl: "",
@@ -221,6 +222,7 @@ export default function LandlordDashboard() {
       pricePerMonth: "",
       rooms: "",
       size: "",
+      maxTenants: "",
       amenities: [],
       images: [],
       videoUrl: "",
@@ -241,6 +243,7 @@ export default function LandlordDashboard() {
       pricePerMonth: property.pricePerMonth || "",
       rooms: property.rooms?.toString() || "",
       size: property.size?.toString() || "",
+      maxTenants: property.maxTenants?.toString() || "",
       amenities: property.amenities || [],
       images: property.images || [],
       videoUrl: property.videoUrl || "",
@@ -871,7 +874,7 @@ export default function LandlordDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="rooms">Number of Rooms</Label>
                 <Input
@@ -889,6 +892,20 @@ export default function LandlordDashboard() {
                   value={propertyFormData.size}
                   onChange={(e) => setPropertyFormData(prev => ({ ...prev, size: e.target.value }))}
                 />
+              </div>
+              <div>
+                <Label htmlFor="maxTenants">Max Tenants</Label>
+                <Input
+                  id="maxTenants"
+                  type="number"
+                  min="1"
+                  value={propertyFormData.maxTenants}
+                  onChange={(e) => setPropertyFormData(prev => ({ ...prev, maxTenants: e.target.value }))}
+                  placeholder="e.g., 4"
+                />
+                <p className="text-xs text-neutral-500 mt-1">
+                  Maximum number of people who can stay
+                </p>
               </div>
             </div>
 
