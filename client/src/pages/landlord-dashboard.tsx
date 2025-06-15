@@ -361,10 +361,10 @@ export default function LandlordDashboard() {
             </div>
             <div className="text-right">
               <Badge variant="secondary" className="mb-2">
-                {user.subscriptionType === 'yearly' ? 'Yearly' : 'Monthly'} Plan
+                {user?.isAdmin ? 'Admin Access' : (user?.subscriptionType === 'yearly' ? 'Yearly' : 'Monthly') + ' Plan'}
               </Badge>
               <div className="text-sm text-white/80">
-                Expires: {user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt).toLocaleDateString() : 'Never'}
+                {user?.isAdmin ? 'Full Access' : `Expires: ${user?.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt).toLocaleDateString() : 'Never'}`}
               </div>
             </div>
           </div>
@@ -378,7 +378,7 @@ export default function LandlordDashboard() {
             <CardContent className="p-6 text-center">
               <Building className="w-8 h-8 text-primary mx-auto mb-2" />
               <div className="text-2xl font-bold text-neutral-800">
-                {properties.length}
+                {Array.isArray(properties) ? properties.length : 0}
               </div>
               <div className="text-sm text-neutral-600">Properties Listed</div>
             </CardContent>
@@ -388,7 +388,7 @@ export default function LandlordDashboard() {
             <CardContent className="p-6 text-center">
               <MessageSquare className="w-8 h-8 text-secondary mx-auto mb-2" />
               <div className="text-2xl font-bold text-neutral-800">
-                {inquiries.length}
+                {Array.isArray(inquiries) ? inquiries.length : 0}
               </div>
               <div className="text-sm text-neutral-600">Total Inquiries</div>
             </CardContent>
@@ -707,15 +707,22 @@ export default function LandlordDashboard() {
                   <div className="pt-4">
                     <h4 className="font-medium mb-2">Plan Features</h4>
                     <ul className="space-y-1 text-sm">
-                      {(user?.subscriptionType === 'yearly' 
-                        ? SUBSCRIPTION_PLANS.yearly.features 
-                        : SUBSCRIPTION_PLANS.monthly.features
-                      ).map((feature, index) => (
-                        <li key={index} className="flex items-center space-x-2">
+                      {user?.isAdmin ? (
+                        <li className="flex items-center space-x-2">
                           <Check className="w-3 h-3 text-green-600" />
-                          <span>{feature}</span>
+                          <span>Full Administrative Access</span>
                         </li>
-                      ))}
+                      ) : (
+                        (user?.subscriptionType === 'yearly' 
+                          ? SUBSCRIPTION_PLANS.yearly.features 
+                          : SUBSCRIPTION_PLANS.monthly.features
+                        ).map((feature, index) => (
+                          <li key={index} className="flex items-center space-x-2">
+                            <Check className="w-3 h-3 text-green-600" />
+                            <span>{feature}</span>
+                          </li>
+                        ))
+                      )}
                     </ul>
                   </div>
                 </CardContent>
