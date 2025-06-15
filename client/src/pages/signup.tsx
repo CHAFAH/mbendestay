@@ -39,7 +39,7 @@ export default function Signup() {
       email: "",
       password: "",
       confirmPassword: "",
-      userType: "renter",
+      userType: "renter" as const,
       phoneNumber: ""
     }
   });
@@ -47,15 +47,30 @@ export default function Signup() {
   const signupMutation = useMutation({
     mutationFn: async (data: SignupForm) => {
       const { confirmPassword, ...signupData } = data;
-      const response = await apiRequest("POST", "/api/auth/signup", signupData);
+      
+      // Convert landlord_yearly to landlord for backend compatibility
+      const processedData = {
+        ...signupData,
+        userType: data.userType === "landlord_yearly" ? "landlord" : data.userType,
+        subscriptionType: data.userType === "landlord_yearly" ? "landlord_yearly" : 
+                         data.userType === "landlord" ? "landlord_monthly" : "renter_monthly"
+      };
+      
+      const response = await apiRequest("POST", "/api/auth/signup", processedData);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (response, variables) => {
       toast({
         title: "Account created successfully!",
         description: "Please sign in to continue.",
       });
-      setLocation("/login");
+      
+      // Redirect based on subscription type
+      if (variables.userType === "landlord" || variables.userType === "landlord_yearly") {
+        setLocation("/landlord-subscribe");
+      } else {
+        setLocation("/subscribe");
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -99,7 +114,7 @@ export default function Signup() {
                         <RadioGroup
                           onValueChange={field.onChange}
                           value={field.value}
-                          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                          className="grid grid-cols-1 lg:grid-cols-3 gap-4"
                         >
                           <FormItem>
                             <FormLabel className="cursor-pointer">
@@ -108,14 +123,13 @@ export default function Signup() {
                                   ? "ring-2 ring-blue-500 bg-blue-50" 
                                   : "hover:border-blue-300"
                               }`}>
-                                <div className="flex items-center space-x-3">
-                                  <RadioGroupItem value="renter" />
-                                  <User className="h-6 w-6 text-blue-600" />
-                                  <div>
-                                    <div className="font-medium text-lg">Looking for Property</div>
-                                    <div className="text-sm text-neutral-600">Search and rent properties across Cameroon</div>
-                                    <div className="text-xs text-blue-600 font-medium mt-1">10,000 FCFA/month to browse</div>
-                                  </div>
+                                <div className="text-center">
+                                  <RadioGroupItem value="renter" className="mb-3" />
+                                  <User className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                                  <div className="font-medium text-lg mb-2">Looking for Property</div>
+                                  <div className="text-sm text-neutral-600 mb-2">Search and rent properties</div>
+                                  <div className="text-lg font-bold text-blue-600">10,000 FCFA</div>
+                                  <div className="text-xs text-blue-600">per month</div>
                                 </div>
                               </Card>
                             </FormLabel>
@@ -127,14 +141,35 @@ export default function Signup() {
                                   ? "ring-2 ring-green-500 bg-green-50" 
                                   : "hover:border-green-300"
                               }`}>
-                                <div className="flex items-center space-x-3">
-                                  <RadioGroupItem value="landlord" />
-                                  <Home className="h-6 w-6 text-green-600" />
-                                  <div>
-                                    <div className="font-medium text-lg">List Properties</div>
-                                    <div className="text-sm text-neutral-600">Rent out your properties to tenants</div>
-                                    <div className="text-xs text-green-600 font-medium mt-1">10,000 FCFA to list properties</div>
-                                  </div>
+                                <div className="text-center">
+                                  <RadioGroupItem value="landlord" className="mb-3" />
+                                  <Home className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                                  <div className="font-medium text-lg mb-2">Monthly Plan</div>
+                                  <div className="text-sm text-neutral-600 mb-2">Properties listed for 2 months</div>
+                                  <div className="text-lg font-bold text-green-600">10,000 FCFA</div>
+                                  <div className="text-xs text-green-600">per month</div>
+                                </div>
+                              </Card>
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem>
+                            <FormLabel className="cursor-pointer">
+                              <Card className={`p-4 transition-all hover:shadow-md relative ${
+                                field.value === "landlord_yearly" 
+                                  ? "ring-2 ring-green-500 bg-green-50" 
+                                  : "hover:border-green-300"
+                              }`}>
+                                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                  <span className="bg-green-600 text-white px-2 py-1 rounded-full text-xs font-medium">Best Value</span>
+                                </div>
+                                <div className="text-center">
+                                  <RadioGroupItem value="landlord_yearly" className="mb-3" />
+                                  <Home className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                                  <div className="font-medium text-lg mb-2">Yearly Plan</div>
+                                  <div className="text-sm text-neutral-600 mb-2">Properties listed for 12 months</div>
+                                  <div className="text-lg font-bold text-green-600">80,000 FCFA</div>
+                                  <div className="text-xs text-green-600">per year</div>
+                                  <div className="text-xs text-green-600 font-medium">Save 40,000 FCFA</div>
                                 </div>
                               </Card>
                             </FormLabel>

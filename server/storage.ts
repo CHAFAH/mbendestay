@@ -38,7 +38,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User>;
-  createUser(user: { id: string; email: string; password: string; firstName: string; lastName: string; username: string; userType: string; phoneNumber?: string; }): Promise<User>;
+  createUser(user: { id: string; email: string; password: string; firstName: string; lastName: string; username: string; userType: string; phoneNumber?: string; subscriptionType?: string; }): Promise<User>;
 
   // Region/Division operations
   getRegions(): Promise<Region[]>;

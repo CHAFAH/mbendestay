@@ -58,7 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: validatedData.lastName,
         username: validatedData.username,
         userType: validatedData.userType,
-        phoneNumber: validatedData.phoneNumber
+        phoneNumber: validatedData.phoneNumber,
+        subscriptionType: validatedData.subscriptionType
       });
 
       res.status(201).json({ 

@@ -248,6 +248,7 @@ export const signupSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   username: z.string().min(3, "Username must be at least 3 characters").regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
   userType: z.enum(["renter", "landlord"], { required_error: "Please select account type" }),
+  subscriptionType: z.enum(["renter_monthly", "landlord_monthly", "landlord_yearly"]).optional(),
   phoneNumber: z.string().optional(),
 });
 
