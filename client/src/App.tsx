@@ -19,6 +19,14 @@ import MessagesPage from "@/pages/messages";
 import ChatPage from "@/pages/chat";
 import Subscribe from "@/pages/subscribe";
 import Profile from "@/pages/profile";
+import About from "@/pages/about";
+import Contact from "@/pages/contact";
+import FAQ from "@/pages/faq";
+import Help from "@/pages/help";
+import Safety from "@/pages/safety";
+import Terms from "@/pages/terms";
+import Privacy from "@/pages/privacy";
+import Cookies from "@/pages/cookies";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -37,6 +45,14 @@ function Router() {
           <Route path="/region/:slug" component={RegionDetail} />
           <Route path="/register-landlord" component={LandlordRegistration} />
           <Route path="/landlord-subscribe" component={LandlordSubscribe} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/faq" component={FAQ} />
+          <Route path="/help" component={Help} />
+          <Route path="/safety" component={Safety} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/cookies" component={Cookies} />
         </>
       ) : isAuthenticated ? (
         <>
@@ -50,6 +66,14 @@ function Router() {
           <Route path="/messages" component={MessagesPage} />
           <Route path="/messages/:id" component={ChatPage} />
           <Route path="/profile" component={Profile} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/faq" component={FAQ} />
+          <Route path="/help" component={Help} />
+          <Route path="/safety" component={Safety} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/cookies" component={Cookies} />
         </>
       ) : (
         <div className="min-h-screen flex items-center justify-center">
