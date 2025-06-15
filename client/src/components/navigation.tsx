@@ -65,22 +65,31 @@ export default function Navigation() {
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
+            <SimpleLanguageSwitcher />
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center overflow-hidden border-2 border-primary/20 hover:border-primary/40 transition-colors">
                   {user?.profileImageUrl ? (
                     <img 
                       src={user.profileImageUrl} 
-                      alt="Profile" 
-                      className="w-8 h-8 rounded-full object-cover"
+                      alt={`${user.firstName || 'User'} Profile`} 
+                      className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <User className="w-4 h-4 text-neutral-600" />
+                    <User className="w-6 h-6 text-neutral-600" />
+                  )}
+                </div>
+                <div className="hidden md:flex flex-col">
+                  <span className="text-sm font-medium text-neutral-900">
+                    {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                  </span>
+                  {user?.isAdmin && (
+                    <span className="text-xs text-primary font-medium">Admin</span>
                   )}
                 </div>
                 <a 
                   href="/api/logout"
-                  className="text-sm text-neutral-600 hover:text-primary"
+                  className="text-sm text-neutral-600 hover:text-primary transition-colors font-medium"
                 >
                   Logout
                 </a>
@@ -88,9 +97,12 @@ export default function Navigation() {
             ) : (
               <a 
                 href="/api/login"
-                className="text-neutral-600 hover:text-primary transition-colors"
+                className="flex items-center space-x-2 text-neutral-600 hover:text-primary transition-colors bg-neutral-50 hover:bg-neutral-100 px-4 py-2 rounded-full border border-neutral-200"
               >
-                <User className="w-5 h-5" />
+                <div className="w-10 h-10 bg-gradient-to-r from-primary to-primary/80 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <span className="hidden md:inline text-sm font-medium">Sign in with Replit</span>
               </a>
             )}
             
