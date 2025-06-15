@@ -114,7 +114,7 @@ export default function Signup() {
                                   <div>
                                     <div className="font-medium text-lg">Looking for Property</div>
                                     <div className="text-sm text-neutral-600">Search and rent properties across Cameroon</div>
-                                    <div className="text-xs text-blue-600 font-medium mt-1">10,000 FCFA/month subscription</div>
+                                    <div className="text-xs text-blue-600 font-medium mt-1">FREE to browse</div>
                                   </div>
                                 </div>
                               </Card>
@@ -133,7 +133,7 @@ export default function Signup() {
                                   <div>
                                     <div className="font-medium text-lg">List Properties</div>
                                     <div className="text-sm text-neutral-600">Rent out your properties to tenants</div>
-                                    <div className="text-xs text-green-600 font-medium mt-1">Free to list properties</div>
+                                    <div className="text-xs text-green-600 font-medium mt-1">10,000 FCFA to list properties</div>
                                   </div>
                                 </div>
                               </Card>

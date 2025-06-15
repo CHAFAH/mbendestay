@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest } from "@/lib/queryClient";
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { 
   Shield, 
   Upload, 
@@ -30,16 +32,23 @@ import {
 } from "lucide-react";
 import { SUBSCRIPTION_PLANS } from "@/lib/constants";
 
+// Load Stripe
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+}
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
 export default function LandlordRegistration() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
+  const [clientSecret, setClientSecret] = useState("");
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     email: user?.email || "",
     phoneNumber: user?.phoneNumber || "",
-    subscriptionType: "monthly" as "monthly" | "yearly",
+    subscriptionType: "landlord_monthly" as "landlord_monthly" | "landlord_yearly",
     nationalIdFront: null as File | null,
     nationalIdBack: null as File | null,
     agreeToTerms: false,
@@ -65,21 +74,23 @@ export default function LandlordRegistration() {
     },
   });
 
-  const subscriptionMutation = useMutation({
+  const createPaymentMutation = useMutation({
     mutationFn: async (subscriptionType: string) => {
-      return await apiRequest("POST", "/api/subscription", { subscriptionType });
-    },
-    onSuccess: () => {
-      setStep(4);
-      toast({
-        title: "Subscription Activated",
-        description: "Your landlord subscription has been activated successfully!",
+      const amount = subscriptionType === "landlord_yearly" ? 80000 : 10000;
+      return await apiRequest("POST", "/api/create-payment-intent", { 
+        amount,
+        subscriptionType,
+        description: `MbendeStay ${subscriptionType === "landlord_yearly" ? "Yearly" : "Monthly"} Landlord Subscription`
       });
+    },
+    onSuccess: (data) => {
+      setClientSecret(data.clientSecret);
+      setStep(4); // Move to payment step
     },
     onError: (error: Error) => {
       toast({
-        title: "Subscription Failed",
-        description: error.message,
+        title: "Payment Setup Failed",
+        description: error.message || "Failed to setup payment. Please try again.",
         variant: "destructive",
       });
     },
@@ -114,8 +125,8 @@ export default function LandlordRegistration() {
         isVerified: true, // In a real app, this would be pending until ID verification
       });
     } else if (step === 3) {
-      // Process subscription
-      subscriptionMutation.mutate(formData.subscriptionType);
+      // Create payment intent
+      createPaymentMutation.mutate(formData.subscriptionType);
     }
   };
 
