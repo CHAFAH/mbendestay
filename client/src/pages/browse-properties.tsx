@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/navigation";
 import SearchForm from "@/components/search-form";
 import PropertyCard from "@/components/property-card";
@@ -12,10 +13,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Filter, X } from "lucide-react";
-import { PROPERTY_TYPES, CONTRACT_TYPES, AMENITIES } from "@/lib/constants";
+import { Filter, X, Lock, Search } from "lucide-react";
+import { PROPERTY_TYPES, CONTRACT_TYPES, AMENITIES, SUBSCRIPTION_PLANS } from "@/lib/constants";
+import { Link } from "wouter";
+import type { PropertyWithDetails } from "@shared/schema";
 
 export default function BrowseProperties() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [location] = useLocation();
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -30,6 +34,60 @@ export default function BrowseProperties() {
     page: 1,
   });
 
+  // Check if user has active renter subscription or is admin
+  const hasActiveSubscription = user?.subscriptionStatus === 'active' || user?.email === 'sani.ray.red@gmail.com';
+  
+  // Show subscription required message if not authenticated or no subscription
+  if (!authLoading && (!isAuthenticated || !hasActiveSubscription)) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <Lock className="w-16 h-16 text-amber-500 mx-auto mb-6" />
+            <h1 className="font-bold text-3xl text-neutral-800 mb-4">
+              Subscription Required
+            </h1>
+            <p className="text-lg text-neutral-600 mb-6">
+              To browse properties, you need an active renter subscription.
+            </p>
+            <div className="bg-white rounded-2xl p-8 max-w-md mx-auto mb-8 shadow-lg">
+              <Search className="w-12 h-12 text-green-600 mx-auto mb-4" />
+              <h3 className="font-bold text-xl mb-2">Renter Subscription</h3>
+              <div className="text-3xl font-bold text-green-600 mb-2">10,000 FCFA</div>
+              <p className="text-neutral-600 mb-4">Per month</p>
+              <ul className="text-left space-y-2 text-sm mb-6">
+                {SUBSCRIPTION_PLANS.renter_monthly.features.en.map((feature, index) => (
+                  <li key={index} className="flex items-center">
+                    <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="space-y-4">
+              {!isAuthenticated ? (
+                <Button 
+                  onClick={() => window.location.href = "/api/login"}
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
+                >
+                  Login to Subscribe
+                </Button>
+              ) : (
+                <Link href="/subscribe">
+                  <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3">
+                    Subscribe Now
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   // Parse URL parameters on mount
   useEffect(() => {
     const params = new URLSearchParams(location.split('?')[1] || '');
@@ -43,7 +101,7 @@ export default function BrowseProperties() {
     }));
   }, [location]);
 
-  const { data: propertiesData, isLoading } = useQuery<{
+  const { data: propertiesData, isLoading: propertiesLoading } = useQuery<{
     properties: PropertyWithDetails[];
     total: number;
   }>({
@@ -255,7 +313,7 @@ export default function BrowseProperties() {
 
           {/* Properties Grid */}
           <div className="flex-1">
-            {isLoading ? (
+            {propertiesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <Card key={index} className="overflow-hidden">
