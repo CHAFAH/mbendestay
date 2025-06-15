@@ -57,8 +57,19 @@ export const getQueryFn: <T>(options: {
       }
     }
 
+    // Add JWT token if available
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const res = await fetch(url, {
       credentials: "include",
+      headers,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
