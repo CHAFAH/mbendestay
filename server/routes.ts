@@ -284,11 +284,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Handle amenities parameter conversion from string to array
       const query: any = { ...req.query };
-      if (query.amenities && typeof query.amenities === 'string') {
-        try {
-          query.amenities = JSON.parse(query.amenities);
-        } catch {
-          query.amenities = [query.amenities];
+      if (query.amenities) {
+        if (typeof query.amenities === 'string') {
+          try {
+            query.amenities = JSON.parse(query.amenities);
+          } catch {
+            query.amenities = query.amenities.split(',').filter(Boolean);
+          }
+        } else if (Array.isArray(query.amenities)) {
+          // Already an array, keep as is
+        } else {
+          delete query.amenities; // Remove invalid amenities parameter
         }
       }
       

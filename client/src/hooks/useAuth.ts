@@ -2,44 +2,50 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 export function useAuth() {
-  // Try local auth first, fallback to Replit auth
-  const { data: localUser, isLoading: localLoading } = useQuery({
-    queryKey: ["/api/auth/user", "jwt"],
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["/api/auth/user"],
     queryFn: async () => {
+      // Try JWT auth first
       const token = localStorage.getItem("auth_token");
-      if (!token) return null;
+      if (token) {
+        try {
+          const response = await fetch("/api/auth/user", {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            return response.json();
+          }
+          // If JWT fails, remove invalid token
+          localStorage.removeItem("auth_token");
+        } catch (error) {
+          localStorage.removeItem("auth_token");
+        }
+      }
       
+      // Try Replit OAuth auth
       try {
         const response = await fetch("/api/auth/user", {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          credentials: 'include'
         });
-        if (!response.ok) throw new Error('Not authenticated');
-        return response.json();
-      } catch {
-        localStorage.removeItem("auth_token");
-        return null;
+        if (response.ok) {
+          return response.json();
+        }
+      } catch (error) {
+        // Both auth methods failed
       }
+      
+      return null;
     },
     retry: false,
   });
-
-  const { data: replitUser, isLoading: replitLoading } = useQuery({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-    enabled: !localUser,
-  });
-
-  const user = localUser || replitUser;
-  const isLoading = localLoading || (replitLoading && !localUser);
 
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     isSubscribed: user?.subscriptionStatus === "active",
-    hasLocalAuth: !!localUser,
   };
 }

@@ -39,6 +39,9 @@ export default function Login() {
         localStorage.setItem("auth_token", data.token);
       }
       
+      // Invalidate auth queries to force refetch
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
       const user = data.user;
       
       // Admin users bypass subscription
