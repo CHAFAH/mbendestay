@@ -251,7 +251,7 @@ export class DatabaseStorage implements IStorage {
     
     const [newProperty] = await db
       .insert(properties)
-      .values([propertyData])
+      .values(propertyData as any)
       .returning();
     return newProperty;
   }
@@ -271,7 +271,7 @@ export class DatabaseStorage implements IStorage {
     
     const [property] = await db
       .update(properties)
-      .set(updateData)
+      .set(updateData as any)
       .where(eq(properties.id, id))
       .returning();
     return property;
