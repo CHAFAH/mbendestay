@@ -30,6 +30,7 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
+  password: varchar("password"), // For local authentication
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -40,6 +41,10 @@ export const users = pgTable("users", {
   subscriptionType: varchar("subscription_type"), // "monthly" | "yearly"
   subscriptionStatus: varchar("subscription_status").default("inactive"), // "active" | "inactive" | "expired"
   subscriptionExpiresAt: timestamp("subscription_expires_at"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  resetToken: varchar("reset_token"),
+  resetTokenExpiresAt: timestamp("reset_token_expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -222,8 +227,36 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
 
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
+  resetToken: true,
+  resetTokenExpiresAt: true,
+});
+
+export const signupSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+});
+
+export const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+export const subscriptionSchema = z.object({
+  type: z.enum(["monthly", "yearly"]),
 });
 
 export const insertPropertySchema = createInsertSchema(properties).omit({

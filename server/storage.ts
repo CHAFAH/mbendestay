@@ -34,8 +34,10 @@ import { eq, and, gte, lte, ilike, inArray, desc, sql } from "drizzle-orm";
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User>;
+  createUser(user: { id: string; email: string; password: string; firstName: string; lastName: string; }): Promise<User>;
 
   // Region/Division operations
   getRegions(): Promise<Region[]>;
