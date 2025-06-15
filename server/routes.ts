@@ -3,16 +3,14 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { authenticateToken, requireSubscription, hashPassword, comparePassword, generateJWT, type AuthenticatedRequest } from "./auth";
-import crypto from "crypto";
+// Admin account that bypasses subscription requirements
+const ADMIN_EMAIL = "sani.ray.red@gmail.com";
 import { 
   insertPropertySchema,
   updatePropertySchema,
   insertInquirySchema,
   insertReviewSchema,
   searchPropertiesSchema,
-  signupSchema,
-  loginSchema,
   subscriptionSchema
 } from "@shared/schema";
 import { z } from "zod";
@@ -21,361 +19,278 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Local Auth routes
-  app.post('/api/auth/signup', async (req, res) => {
-    try {
-      const validatedData = signupSchema.parse(req.body);
-      
-      // Check if user already exists
-      const existingUser = await storage.getUserByEmail(validatedData.email);
-      if (existingUser) {
-        return res.status(400).json({ message: "User already exists with this email" });
-      }
-
-      // Hash password and create user
-      const hashedPassword = await hashPassword(validatedData.password);
-      const userId = crypto.randomUUID();
-      
-      const user = await storage.createUser({
-        id: userId,
-        email: validatedData.email,
-        password: hashedPassword,
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
-      });
-
-      // Generate JWT token
-      const token = generateJWT({
-        id: user.id,
-        email: user.email!,
-        subscriptionStatus: user.subscriptionStatus || "inactive",
-      });
-
-      res.status(201).json({
-        message: "Account created successfully",
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          subscriptionStatus: user.subscriptionStatus,
-        },
-      });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      console.error("Signup error:", error);
-      res.status(500).json({ message: "Failed to create account" });
-    }
-  });
-
-  app.post('/api/auth/login', async (req, res) => {
-    try {
-      const validatedData = loginSchema.parse(req.body);
-      
-      // Find user by email
-      const user = await storage.getUserByEmail(validatedData.email);
-      if (!user || !user.password) {
-        return res.status(401).json({ message: "Invalid email or password" });
-      }
-
-      // Verify password
-      const isValidPassword = await comparePassword(validatedData.password, user.password);
-      if (!isValidPassword) {
-        return res.status(401).json({ message: "Invalid email or password" });
-      }
-
-      // Generate JWT token
-      const token = generateJWT({
-        id: user.id,
-        email: user.email!,
-        subscriptionStatus: user.subscriptionStatus || "inactive",
-      });
-
-      res.json({
-        message: "Login successful",
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          subscriptionStatus: user.subscriptionStatus,
-        },
-      });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Failed to login" });
-    }
-  });
-
-  app.get('/api/auth/me', authenticateToken, async (req: AuthenticatedRequest, res) => {
-    try {
-      const user = await storage.getUser(req.user!.id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      res.json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        subscriptionStatus: user.subscriptionStatus,
-        subscriptionType: user.subscriptionType,
-        subscriptionExpiresAt: user.subscriptionExpiresAt,
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-
-  // Subscription routes
-  app.post('/api/subscription/create', authenticateToken, async (req: AuthenticatedRequest, res) => {
-    try {
-      const validatedData = subscriptionSchema.parse(req.body);
-      const userId = req.user!.id;
-      
-      // Calculate subscription expiration
-      const now = new Date();
-      const expiresAt = new Date(now);
-      if (validatedData.type === "monthly") {
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
-      } else {
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-      }
-
-      // Update user subscription
-      const updatedUser = await storage.updateUser(userId, {
-        subscriptionStatus: "active",
-        subscriptionType: validatedData.type,
-        subscriptionExpiresAt: expiresAt,
-      });
-
-      res.json({
-        message: "Subscription activated successfully",
-        user: {
-          id: updatedUser.id,
-          email: updatedUser.email,
-          subscriptionStatus: updatedUser.subscriptionStatus,
-          subscriptionType: updatedUser.subscriptionType,
-          subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
-        },
-      });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      console.error("Subscription error:", error);
-      res.status(500).json({ message: "Failed to activate subscription" });
-    }
-  });
-
-  // Auth routes (Replit Auth compatibility)
+  // Replit Auth user endpoint
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
       const user = await storage.getUser(userId);
-      res.json(user);
+      
+      // Check if this is the admin account
+      const isAdmin = userEmail === ADMIN_EMAIL;
+      
+      // Return user data with admin status
+      res.json({
+        id: user?.id || userId,
+        email: userEmail,
+        firstName: user?.firstName || req.user.claims.first_name,
+        lastName: user?.lastName || req.user.claims.last_name,
+        profileImageUrl: req.user.claims.profile_image_url,
+        subscriptionStatus: isAdmin ? 'admin' : (user?.subscriptionStatus || 'none'),
+        isAdmin
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  // Region/Division routes
-  app.get('/api/regions', async (req, res) => {
+  // Subscription creation endpoint (protected by Replit auth)
+  app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
     try {
-      const regions = await storage.getRegions();
-      res.json(regions);
-    } catch (error) {
-      console.error("Error fetching regions:", error);
-      res.status(500).json({ message: "Failed to fetch regions" });
+      const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
+      
+      // Check if admin - bypass subscription requirement
+      if (userEmail === ADMIN_EMAIL) {
+        return res.json({
+          message: 'Admin account - subscription not required',
+          user: {
+            id: userId,
+            email: userEmail,
+            subscriptionStatus: 'admin',
+            isAdmin: true
+          }
+        });
+      }
+
+      const validatedData = subscriptionSchema.parse(req.body);
+
+      // Calculate subscription end date
+      const now = new Date();
+      const subscriptionEndDate = new Date(now);
+      
+      if (validatedData.plan === 'monthly') {
+        subscriptionEndDate.setMonth(now.getMonth() + 1);
+      } else if (validatedData.plan === 'yearly') {
+        subscriptionEndDate.setFullYear(now.getFullYear() + 1);
+      }
+
+      // Update or create user with subscription
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        email: userEmail,
+        firstName: req.user.claims.first_name,
+        lastName: req.user.claims.last_name,
+        profileImageUrl: req.user.claims.profile_image_url,
+        subscriptionStatus: 'active',
+        subscriptionPlan: validatedData.plan,
+        subscriptionEndDate: subscriptionEndDate,
+      });
+
+      res.json({
+        message: 'Subscription activated successfully',
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          subscriptionStatus: updatedUser.subscriptionStatus,
+          subscriptionPlan: updatedUser.subscriptionPlan,
+          subscriptionEndDate: updatedUser.subscriptionEndDate,
+          isAdmin: false
+        }
+      });
+    } catch (error: any) {
+      console.error('Subscription error:', error);
+      res.status(400).json({ message: error.message || 'Failed to create subscription' });
     }
   });
 
-  app.get('/api/regions/:regionId/divisions', async (req, res) => {
-    try {
-      const regionId = parseInt(req.params.regionId);
-      if (isNaN(regionId)) {
-        return res.status(400).json({ message: "Invalid region ID" });
-      }
-      
-      const divisions = await storage.getDivisionsByRegion(regionId);
-      res.json(divisions);
-    } catch (error) {
-      console.error("Error fetching divisions:", error);
-      res.status(500).json({ message: "Failed to fetch divisions" });
+  // Protected route helper function
+  const requireSubscriptionOrAdmin = async (req: any, res: any, next: any) => {
+    const userEmail = req.user?.claims?.email;
+    const userId = req.user?.claims?.sub;
+    
+    // Admin bypass
+    if (userEmail === ADMIN_EMAIL) {
+      return next();
     }
-  });
+    
+    // Check subscription for non-admin users
+    const user = await storage.getUser(userId);
+    if (!user || user.subscriptionStatus !== 'active') {
+      return res.status(403).json({ 
+        message: 'Active subscription required to access this content',
+        requiresSubscription: true 
+      });
+    }
+    
+    next();
+  };
 
   // Property routes
   app.get('/api/properties', async (req, res) => {
     try {
-      // Handle region slug to ID conversion
-      let regionId = req.query.regionId ? parseInt(req.query.regionId as string) : undefined;
-      
-      if (req.query.regionSlug && !regionId) {
-        const regions = await storage.getRegions();
-        const region = regions.find(r => r.slug === req.query.regionSlug);
-        regionId = region?.id;
-      }
-
-      const filters = searchPropertiesSchema.parse({
-        regionId,
-        divisionId: req.query.divisionId ? parseInt(req.query.divisionId as string) : undefined,
-        propertyType: req.query.propertyType,
-        contractType: req.query.contractType,
-        minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
-        maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
-        rooms: req.query.rooms ? parseInt(req.query.rooms as string) : undefined,
-        page: req.query.page ? parseInt(req.query.page as string) : 1,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 12,
-      });
-
+      const filters = searchPropertiesSchema.parse(req.query);
       const result = await storage.getProperties(filters);
       res.json(result);
     } catch (error) {
-      console.error("Error fetching properties:", error);
-      res.status(500).json({ message: "Failed to fetch properties" });
+      console.error('Error fetching properties:', error);
+      res.status(500).json({ message: 'Failed to fetch properties' });
     }
   });
 
+  // Property detail route - requires subscription for full details
   app.get('/api/properties/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid property ID" });
+      const property = await storage.getProperty(id);
+      
+      if (!property) {
+        return res.status(404).json({ message: 'Property not found' });
       }
 
-      const property = await storage.getProperty(id);
-      if (!property) {
-        return res.status(404).json({ message: "Property not found" });
+      // Check if user is authenticated and has subscription/admin access
+      let hasFullAccess = false;
+      if (req.user) {
+        const userEmail = req.user.claims?.email;
+        const userId = req.user.claims?.sub;
+        
+        if (userEmail === ADMIN_EMAIL) {
+          hasFullAccess = true;
+        } else {
+          const user = await storage.getUser(userId);
+          hasFullAccess = user?.subscriptionStatus === 'active';
+        }
+      }
+
+      // Return limited data for non-subscribers
+      if (!hasFullAccess) {
+        const limitedProperty = {
+          ...property,
+          address: 'Subscription required to view exact location',
+          landlord: {
+            ...property.landlord,
+            email: 'Subscribe to contact landlord',
+            phone: 'Subscribe to view phone number'
+          }
+        };
+        return res.json({ ...limitedProperty, requiresSubscription: true });
       }
 
       res.json(property);
     } catch (error) {
-      console.error("Error fetching property:", error);
-      res.status(500).json({ message: "Failed to fetch property" });
+      console.error('Error fetching property:', error);
+      res.status(500).json({ message: 'Failed to fetch property' });
     }
   });
 
-  // Protected landlord routes
+  // Landlord dashboard routes (require authentication)
   app.get('/api/landlord/properties', isAuthenticated, async (req: any, res) => {
     try {
       const landlordId = req.user.claims.sub;
       const properties = await storage.getPropertiesByLandlord(landlordId);
       res.json(properties);
     } catch (error) {
-      console.error("Error fetching landlord properties:", error);
-      res.status(500).json({ message: "Failed to fetch properties" });
+      console.error('Error fetching landlord properties:', error);
+      res.status(500).json({ message: 'Failed to fetch properties' });
     }
   });
 
-  app.post('/api/landlord/properties', isAuthenticated, async (req: any, res) => {
+  app.post('/api/properties', isAuthenticated, async (req: any, res) => {
     try {
+      const validatedData = insertPropertySchema.parse(req.body);
       const landlordId = req.user.claims.sub;
-      const user = await storage.getUser(landlordId);
       
-      if (!user?.isVerified || user.subscriptionStatus !== 'active') {
-        return res.status(403).json({ 
-          message: "Active subscription and verification required to create properties" 
-        });
-      }
-
-      const propertyData = insertPropertySchema.parse({
-        ...req.body,
+      const property = await storage.createProperty({
+        ...validatedData,
         landlordId,
       });
-
-      const property = await storage.createProperty(propertyData);
-      res.json(property);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid property data", errors: error.errors });
-      }
-      console.error("Error creating property:", error);
-      res.status(500).json({ message: "Failed to create property" });
+      
+      res.status(201).json(property);
+    } catch (error: any) {
+      console.error('Error creating property:', error);
+      res.status(400).json({ message: error.message || 'Failed to create property' });
     }
   });
 
-  app.put('/api/landlord/properties/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/properties/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const propertyId = parseInt(req.params.id);
+      const id = parseInt(req.params.id);
+      const landlordId = req.user.claims.sub;
+      const validatedData = updatePropertySchema.parse(req.body);
+      
+      // Verify ownership
+      const existingProperty = await storage.getProperty(id);
+      if (!existingProperty || existingProperty.landlordId !== landlordId) {
+        return res.status(403).json({ message: 'Not authorized to update this property' });
+      }
+      
+      const property = await storage.updateProperty(id, validatedData);
+      res.json(property);
+    } catch (error: any) {
+      console.error('Error updating property:', error);
+      res.status(400).json({ message: error.message || 'Failed to update property' });
+    }
+  });
+
+  app.delete('/api/properties/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
       const landlordId = req.user.claims.sub;
       
-      if (isNaN(propertyId)) {
-        return res.status(400).json({ message: "Invalid property ID" });
-      }
-
       // Verify ownership
-      const existingProperty = await storage.getProperty(propertyId);
+      const existingProperty = await storage.getProperty(id);
       if (!existingProperty || existingProperty.landlordId !== landlordId) {
-        return res.status(404).json({ message: "Property not found" });
+        return res.status(403).json({ message: 'Not authorized to delete this property' });
       }
-
-      const updateData = updatePropertySchema.parse(req.body);
-      const property = await storage.updateProperty(propertyId, updateData);
-      res.json(property);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid property data", errors: error.errors });
-      }
-      console.error("Error updating property:", error);
-      res.status(500).json({ message: "Failed to update property" });
-    }
-  });
-
-  app.delete('/api/landlord/properties/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const propertyId = parseInt(req.params.id);
-      const landlordId = req.user.claims.sub;
       
-      if (isNaN(propertyId)) {
-        return res.status(400).json({ message: "Invalid property ID" });
-      }
-
-      // Verify ownership
-      const existingProperty = await storage.getProperty(propertyId);
-      if (!existingProperty || existingProperty.landlordId !== landlordId) {
-        return res.status(404).json({ message: "Property not found" });
-      }
-
-      await storage.deleteProperty(propertyId);
-      res.json({ message: "Property deleted successfully" });
+      await storage.deleteProperty(id);
+      res.json({ message: 'Property deleted successfully' });
     } catch (error) {
-      console.error("Error deleting property:", error);
-      res.status(500).json({ message: "Failed to delete property" });
+      console.error('Error deleting property:', error);
+      res.status(500).json({ message: 'Failed to delete property' });
     }
   });
 
-  // Inquiry routes
-  app.post('/api/properties/:id/inquiries', async (req, res) => {
+  // Regions and divisions
+  app.get('/api/regions', async (req, res) => {
     try {
-      const propertyId = parseInt(req.params.id);
-      if (isNaN(propertyId)) {
-        return res.status(400).json({ message: "Invalid property ID" });
-      }
+      const regions = await storage.getRegions();
+      res.json(regions);
+    } catch (error) {
+      console.error('Error fetching regions:', error);
+      res.status(500).json({ message: 'Failed to fetch regions' });
+    }
+  });
 
-      const inquiryData = insertInquirySchema.parse({
-        ...req.body,
-        propertyId,
+  app.get('/api/regions/:regionId/divisions', async (req, res) => {
+    try {
+      const regionId = parseInt(req.params.regionId);
+      const divisions = await storage.getDivisionsByRegion(regionId);
+      res.json(divisions);
+    } catch (error) {
+      console.error('Error fetching divisions:', error);
+      res.status(500).json({ message: 'Failed to fetch divisions' });
+    }
+  });
+
+  // Inquiry routes (require subscription for landlord contact)
+  app.post('/api/inquiries', isAuthenticated, requireSubscriptionOrAdmin, async (req: any, res) => {
+    try {
+      const validatedData = insertInquirySchema.parse(req.body);
+      const renterId = req.user.claims.sub;
+      
+      const inquiry = await storage.createInquiry({
+        ...validatedData,
+        renterId,
       });
-
-      const inquiry = await storage.createInquiry(inquiryData);
-      res.json(inquiry);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid inquiry data", errors: error.errors });
-      }
-      console.error("Error creating inquiry:", error);
-      res.status(500).json({ message: "Failed to create inquiry" });
+      
+      res.status(201).json(inquiry);
+    } catch (error: any) {
+      console.error('Error creating inquiry:', error);
+      res.status(400).json({ message: error.message || 'Failed to create inquiry' });
     }
   });
 
@@ -385,317 +300,189 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inquiries = await storage.getInquiriesByLandlord(landlordId);
       res.json(inquiries);
     } catch (error) {
-      console.error("Error fetching inquiries:", error);
-      res.status(500).json({ message: "Failed to fetch inquiries" });
+      console.error('Error fetching inquiries:', error);
+      res.status(500).json({ message: 'Failed to fetch inquiries' });
     }
   });
 
   // Review routes
-  app.post('/api/properties/:id/reviews', async (req, res) => {
+  app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
-      const propertyId = parseInt(req.params.id);
-      if (isNaN(propertyId)) {
-        return res.status(400).json({ message: "Invalid property ID" });
-      }
-
-      const reviewData = insertReviewSchema.parse({
-        ...req.body,
-        propertyId,
+      const validatedData = insertReviewSchema.parse(req.body);
+      const reviewerId = req.user.claims.sub;
+      
+      const review = await storage.createReview({
+        ...validatedData,
+        reviewerId,
       });
-
-      const review = await storage.createReview(reviewData);
-      res.json(review);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid review data", errors: error.errors });
-      }
-      console.error("Error creating review:", error);
-      res.status(500).json({ message: "Failed to create review" });
+      
+      res.status(201).json(review);
+    } catch (error: any) {
+      console.error('Error creating review:', error);
+      res.status(400).json({ message: error.message || 'Failed to create review' });
     }
   });
 
-  app.get('/api/properties/:id/reviews', async (req, res) => {
+  app.get('/api/properties/:propertyId/reviews', async (req, res) => {
     try {
-      const propertyId = parseInt(req.params.id);
-      if (isNaN(propertyId)) {
-        return res.status(400).json({ message: "Invalid property ID" });
-      }
-
+      const propertyId = parseInt(req.params.propertyId);
       const reviews = await storage.getReviewsByProperty(propertyId);
       res.json(reviews);
     } catch (error) {
-      console.error("Error fetching reviews:", error);
-      res.status(500).json({ message: "Failed to fetch reviews" });
+      console.error('Error fetching reviews:', error);
+      res.status(500).json({ message: 'Failed to fetch reviews' });
     }
   });
 
-  app.get('/api/properties/:id/rating-stats', async (req, res) => {
+  app.get('/api/properties/:propertyId/rating-stats', async (req, res) => {
     try {
-      const propertyId = parseInt(req.params.id);
-      if (isNaN(propertyId)) {
-        return res.status(400).json({ message: "Invalid property ID" });
-      }
-
+      const propertyId = parseInt(req.params.propertyId);
       const stats = await storage.getPropertyRatingStats(propertyId);
       res.json(stats);
     } catch (error) {
-      console.error("Error fetching rating stats:", error);
-      res.status(500).json({ message: "Failed to fetch rating stats" });
+      console.error('Error fetching rating stats:', error);
+      res.status(500).json({ message: 'Failed to fetch rating stats' });
     }
   });
 
-  app.delete('/api/reviews/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/reviews/:reviewId', isAuthenticated, async (req: any, res) => {
     try {
-      const reviewId = parseInt(req.params.id);
+      const reviewId = parseInt(req.params.reviewId);
       const userId = req.user.claims.sub;
       
-      if (isNaN(reviewId)) {
-        return res.status(400).json({ message: "Invalid review ID" });
-      }
-
       await storage.deleteReview(reviewId, userId);
-      res.json({ message: "Review deleted successfully" });
+      res.json({ message: 'Review deleted successfully' });
     } catch (error) {
-      console.error("Error deleting review:", error);
-      res.status(500).json({ message: "Failed to delete review" });
+      console.error('Error deleting review:', error);
+      res.status(500).json({ message: 'Failed to delete review' });
     }
   });
 
-  // Profile update routes
-  app.put('/api/profile', isAuthenticated, async (req: any, res) => {
+  // Messaging routes (require subscription)
+  app.post('/api/conversations', isAuthenticated, requireSubscriptionOrAdmin, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const updateData = req.body;
+      const { propertyId, landlordId } = req.body;
+      const renterId = req.user.claims.sub;
       
-      const user = await storage.updateUser(userId, updateData);
-      res.json(user);
+      const conversation = await storage.getOrCreateConversation(propertyId, landlordId, renterId);
+      res.json(conversation);
     } catch (error) {
-      console.error("Error updating profile:", error);
-      res.status(500).json({ message: "Failed to update profile" });
+      console.error('Error creating conversation:', error);
+      res.status(500).json({ message: 'Failed to create conversation' });
     }
   });
 
-  // Subscription management
-  app.post('/api/subscription', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { subscriptionType } = req.body;
-      
-      if (!['monthly', 'yearly'].includes(subscriptionType)) {
-        return res.status(400).json({ message: "Invalid subscription type" });
-      }
-
-      const expiresAt = new Date();
-      if (subscriptionType === 'monthly') {
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
-      } else {
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-      }
-
-      const user = await storage.updateUser(userId, {
-        subscriptionType,
-        subscriptionStatus: 'active',
-        subscriptionExpiresAt: expiresAt,
-      });
-
-      res.json(user);
-    } catch (error) {
-      console.error("Error updating subscription:", error);
-      res.status(500).json({ message: "Failed to update subscription" });
-    }
-  });
-
-  // Messaging routes
-  app.get("/api/conversations", isAuthenticated, async (req: any, res) => {
+  app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const conversations = await storage.getConversationsByUser(userId);
       res.json(conversations);
     } catch (error) {
-      console.error("Error fetching conversations:", error);
-      res.status(500).json({ message: "Failed to fetch conversations" });
+      console.error('Error fetching conversations:', error);
+      res.status(500).json({ message: 'Failed to fetch conversations' });
     }
   });
 
-  app.get("/api/conversations/:id", isAuthenticated, async (req: any, res) => {
+  app.get('/api/conversations/:conversationId', isAuthenticated, async (req: any, res) => {
     try {
+      const conversationId = parseInt(req.params.conversationId);
       const userId = req.user.claims.sub;
-      const conversationId = parseInt(req.params.id);
-      const conversation = await storage.getConversation(conversationId, userId);
       
+      const conversation = await storage.getConversation(conversationId, userId);
       if (!conversation) {
-        return res.status(404).json({ message: "Conversation not found" });
+        return res.status(404).json({ message: 'Conversation not found' });
       }
-
-      // Mark messages as read
-      await storage.markMessagesAsRead(conversationId, userId);
       
       res.json(conversation);
     } catch (error) {
-      console.error("Error fetching conversation:", error);
-      res.status(500).json({ message: "Failed to fetch conversation" });
+      console.error('Error fetching conversation:', error);
+      res.status(500).json({ message: 'Failed to fetch conversation' });
     }
   });
 
-  app.post("/api/conversations", isAuthenticated, async (req: any, res) => {
+  app.post('/api/conversations/:conversationId/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { propertyId, message } = req.body;
-
-      // Get property to find landlord
-      const property = await storage.getProperty(propertyId);
-      if (!property) {
-        return res.status(404).json({ message: "Property not found" });
-      }
-
-      const landlordId = property.landlord.id;
-      const renterId = userId;
-
-      // Get or create conversation
-      const conversation = await storage.getOrCreateConversation(
-        propertyId,
-        landlordId,
-        renterId
-      );
-
-      // Send initial message if provided
-      if (message) {
-        await storage.sendMessage({
-          conversationId: conversation.id,
-          senderId: userId,
-          content: message,
-          messageType: "text",
-        });
-      }
-
-      res.json(conversation);
-    } catch (error) {
-      console.error("Error creating conversation:", error);
-      res.status(500).json({ message: "Failed to create conversation" });
-    }
-  });
-
-  app.post("/api/conversations/:id/messages", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const conversationId = parseInt(req.params.id);
-      const { content, messageType = "text" } = req.body;
-
-      // Verify user has access to this conversation
-      const conversation = await storage.getConversation(conversationId, userId);
-      if (!conversation) {
-        return res.status(404).json({ message: "Conversation not found" });
-      }
-
+      const conversationId = parseInt(req.params.conversationId);
+      const senderId = req.user.claims.sub;
+      const { content } = req.body;
+      
       const message = await storage.sendMessage({
         conversationId,
-        senderId: userId,
+        senderId,
         content,
-        messageType,
       });
-
-      res.json(message);
+      
+      res.status(201).json(message);
     } catch (error) {
-      console.error("Error sending message:", error);
-      res.status(500).json({ message: "Failed to send message" });
+      console.error('Error sending message:', error);
+      res.status(500).json({ message: 'Failed to send message' });
     }
   });
 
-  app.get("/api/messages/unread-count", isAuthenticated, async (req: any, res) => {
+  app.get('/api/conversations/:conversationId/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.conversationId);
+      const messages = await storage.getMessagesByConversation(conversationId);
+      res.json(messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ message: 'Failed to fetch messages' });
+    }
+  });
+
+  app.patch('/api/conversations/:conversationId/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.conversationId);
+      const userId = req.user.claims.sub;
+      
+      await storage.markMessagesAsRead(conversationId, userId);
+      res.json({ message: 'Messages marked as read' });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+      res.status(500).json({ message: 'Failed to mark messages as read' });
+    }
+  });
+
+  app.get('/api/unread-count', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const count = await storage.getUnreadMessageCount(userId);
       res.json({ count });
     } catch (error) {
-      console.error("Error fetching unread count:", error);
-      res.status(500).json({ message: "Failed to fetch unread count" });
+      console.error('Error fetching unread count:', error);
+      res.status(500).json({ message: 'Failed to fetch unread count' });
     }
   });
 
   const httpServer = createServer(app);
 
-  // WebSocket server for real-time messaging
+  // WebSocket setup for real-time messaging
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  
-  // Store active connections with user IDs
-  const activeConnections = new Map<string, WebSocket>();
 
   wss.on('connection', (ws: WebSocket, req) => {
-    let userId: string | null = null;
+    console.log('WebSocket connection established');
 
-    ws.on('message', async (data) => {
+    ws.on('message', (message) => {
       try {
-        const message = JSON.parse(data.toString());
+        const data = JSON.parse(message.toString());
         
-        if (message.type === 'auth' && message.userId) {
-          userId = message.userId;
-          activeConnections.set(userId, ws);
-          ws.send(JSON.stringify({ type: 'auth_success', userId }));
-        }
-        
-        if (message.type === 'send_message' && userId) {
-          const { conversationId, content, messageType = 'text' } = message;
-          
-          // Verify user has access to this conversation
-          const conversation = await storage.getConversation(conversationId, userId);
-          if (!conversation) {
-            ws.send(JSON.stringify({ type: 'error', message: 'Conversation not found' }));
-            return;
+        // Broadcast message to all connected clients
+        wss.clients.forEach((client) => {
+          if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(data));
           }
-
-          // Save message to database
-          const newMessage = await storage.sendMessage({
-            conversationId,
-            senderId: userId,
-            content,
-            messageType,
-          });
-
-          // Get sender details
-          const sender = await storage.getUser(userId!);
-          const messageWithSender = {
-            ...newMessage,
-            sender
-          };
-
-          // Send to both participants
-          const otherUserId = conversation.landlordId === userId 
-            ? conversation.renterId 
-            : conversation.landlordId;
-          
-          const messageData = {
-            type: 'new_message',
-            conversationId,
-            message: messageWithSender
-          };
-
-          // Send to sender
-          if (activeConnections.has(userId)) {
-            activeConnections.get(userId)!.send(JSON.stringify(messageData));
-          }
-
-          // Send to recipient
-          if (activeConnections.has(otherUserId)) {
-            activeConnections.get(otherUserId)!.send(JSON.stringify(messageData));
-          }
-        }
+        });
       } catch (error) {
         console.error('WebSocket message error:', error);
-        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
       }
     });
 
     ws.on('close', () => {
-      if (userId) {
-        activeConnections.delete(userId);
-      }
+      console.log('WebSocket connection closed');
     });
 
     ws.on('error', (error) => {
       console.error('WebSocket error:', error);
-      if (userId) {
-        activeConnections.delete(userId);
-      }
     });
   });
 
