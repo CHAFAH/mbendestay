@@ -18,7 +18,8 @@ import {
   Check
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { SUBSCRIPTION_PLANS, useTranslation } from "@/lib/constants";
+import { SUBSCRIPTION_PLANS } from "@/lib/constants";
+import { useTranslation } from "@/lib/translations";
 import { REGIONS_DATA } from "@/lib/regions-data";
 
 export default function Landing() {

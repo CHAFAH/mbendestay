@@ -8,6 +8,8 @@ import { Slider } from "@/components/ui/slider";
 import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { PROPERTY_TYPES } from "@/lib/constants";
+import { useLanguage } from "@/components/simple-language-switcher";
+import { useTranslation } from "@/lib/translations";
 
 interface SearchFormProps {
   onSearch: (filters: any) => void;
@@ -15,6 +17,8 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({ onSearch, className = "" }: SearchFormProps) {
+  const { language } = useLanguage();
+  const { t } = useTranslation(language);
   const [region, setRegion] = useState("");
   const [division, setDivision] = useState("");
   const [propertyType, setPropertyType] = useState("");
@@ -67,14 +71,14 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
         {/* Region Filter */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-neutral-700">Region</Label>
+          <Label className="text-sm font-medium text-neutral-700">{t('selectRegion')}</Label>
           <Select value={region} onValueChange={setRegion}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="All Regions" />
+              <SelectValue placeholder={t('allRegions')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Regions</SelectItem>
-              {regions.map((r: any) => (
+              <SelectItem value="all">{t('allRegions')}</SelectItem>
+              {(regions as any[]).map((r: any) => (
                 <SelectItem key={r.id} value={r.id.toString()}>
                   {r.name}
                 </SelectItem>
@@ -85,14 +89,14 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
 
         {/* Division Filter */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-neutral-700">Division</Label>
+          <Label className="text-sm font-medium text-neutral-700">{t('selectDivision')}</Label>
           <Select value={division} onValueChange={setDivision} disabled={!region || region === "all"}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={region && region !== "all" ? "Select Division" : "Select Region First"} />
+              <SelectValue placeholder={region && region !== "all" ? t('selectDivision') : t('selectRegion')} />
             </SelectTrigger>
             <SelectContent className="max-h-60 overflow-y-auto">
-              <SelectItem value="all">All Divisions</SelectItem>
-              {divisions.map((d: any) => (
+              <SelectItem value="all">{t('allDivisions')}</SelectItem>
+              {(divisions as any[]).map((d: any) => (
                 <SelectItem key={d.id} value={d.slug}>
                   {d.name}
                 </SelectItem>
@@ -103,13 +107,13 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
 
         {/* Property Type */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-neutral-700">Property Type</Label>
+          <Label className="text-sm font-medium text-neutral-700">{t('propertyType')}</Label>
           <Select value={propertyType} onValueChange={setPropertyType}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Any Type" />
+              <SelectValue placeholder={t('allTypes')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Any Type</SelectItem>
+              <SelectItem value="all">{t('allTypes')}</SelectItem>
               {PROPERTY_TYPES.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
@@ -122,7 +126,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
         {/* Price Range */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-neutral-700">
-            Price Range: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} XCFA
+            {t('priceRange')}: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} XCFA
           </Label>
           <Slider
             value={priceRange}
@@ -138,7 +142,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
         <div>
           <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold">
             <Search className="w-4 h-4 mr-2" />
-            Search
+            {t('search')}
           </Button>
         </div>
       </form>
