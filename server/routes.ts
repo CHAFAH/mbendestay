@@ -105,7 +105,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Combined auth endpoint that works with both Replit OAuth and custom auth
   app.get('/api/auth/user', async (req: any, res) => {
-    // First try Replit auth
+    // First try custom JWT auth
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.substring(7);
+        const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        const user = await storage.getUser(decoded.id);
+        
+        if (user) {
+          const isAdmin = user.email === ADMIN_EMAIL;
+          return res.json({
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            subscriptionStatus: isAdmin ? 'admin' : (user.subscriptionStatus || 'none'),
+            isAdmin
+          });
+        }
+      } catch (error) {
+        console.error("JWT auth error:", error);
+      }
+    }
+
+    // Try Replit auth
     if (req.isAuthenticated && req.isAuthenticated()) {
       try {
         const userId = req.user.claims.sub;
@@ -131,30 +155,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
 
-    // Try custom JWT auth
-    try {
-      await authenticateToken(req as any, res, () => {
-        const user = (req as any).user;
-        res.json({
-          id: user.id,
-          email: user.email,
-          subscriptionStatus: user.subscriptionStatus,
-          isAdmin: user.email === ADMIN_EMAIL
-        });
-      });
-    } catch (error) {
-      res.status(401).json({ message: "Unauthorized" });
-    }
+    res.status(401).json({ message: "Unauthorized" });
   });
 
-  // Subscription creation endpoint (protected by Replit auth)
-  app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
+  // Combined authentication middleware
+  const authenticateUser = async (req: any, res: any, next: any) => {
+    // Try JWT auth first
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.substring(7);
+        const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        const user = await storage.getUser(decoded.id);
+        if (user) {
+          req.user = { ...user, isAdmin: user.email === ADMIN_EMAIL };
+          return next();
+        }
+      } catch (error) {
+        console.error("JWT auth error:", error);
+      }
+    }
+
+    // Try Replit auth
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      req.user = {
+        id: req.user.claims.sub,
+        email: req.user.claims.email,
+        isAdmin: req.user.claims.email === ADMIN_EMAIL
+      };
+      return next();
+    }
+
+    res.status(401).json({ message: "Unauthorized" });
+  };
+
+  // Subscription creation endpoint (protected by combined auth)
+  app.post('/api/subscription/create', authenticateUser, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const userEmail = req.user.claims.email;
+      const userId = req.user.id;
+      const userEmail = req.user.email;
       
       // Check if admin - bypass subscription requirement
-      if (userEmail === ADMIN_EMAIL) {
+      if (req.user.isAdmin || userEmail === ADMIN_EMAIL) {
         return res.json({
           message: 'Admin account - subscription not required',
           user: {

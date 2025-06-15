@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 export function useAuth() {
   // Try local auth first, fallback to Replit auth
   const { data: localUser, isLoading: localLoading } = useQuery({
-    queryKey: ["/api/auth/me"],
+    queryKey: ["/api/auth/user", "jwt"],
     queryFn: async () => {
       const token = localStorage.getItem("auth_token");
       if (!token) return null;
