@@ -910,6 +910,65 @@ export default function LandlordDashboard() {
               </div>
             </div>
 
+            {/* Image Upload Section */}
+            <div>
+              <Label>Property Images</Label>
+              <div className="mt-2 space-y-3">
+                <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
+                  <Camera className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                  <p className="text-sm text-neutral-600 mb-3">
+                    Upload property images (Max 10 images, 5MB each)
+                  </p>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (files.length > 10) {
+                        alert("Maximum 10 images allowed");
+                        return;
+                      }
+                      // Convert files to URLs for preview (in real app, upload to server)
+                      const imageUrls = files.map(file => URL.createObjectURL(file));
+                      setPropertyFormData(prev => ({ 
+                        ...prev, 
+                        images: [...prev.images, ...imageUrls].slice(0, 10)
+                      }));
+                    }}
+                    className="w-auto mx-auto"
+                  />
+                </div>
+                
+                {/* Image Preview */}
+                {propertyFormData.images.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {propertyFormData.images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image}
+                          alt={`Property ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPropertyFormData(prev => ({
+                              ...prev,
+                              images: prev.images.filter((_, i) => i !== index)
+                            }));
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="videoUrl">Video URL (Optional)</Label>
               <Input
@@ -919,6 +978,9 @@ export default function LandlordDashboard() {
                 onChange={(e) => setPropertyFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
                 placeholder="https://youtube.com/watch?v=..."
               />
+              <p className="text-xs text-neutral-500 mt-1">
+                Add a YouTube, Vimeo, or other video URL to showcase your property
+              </p>
             </div>
 
             <div className="flex space-x-3 pt-6">
