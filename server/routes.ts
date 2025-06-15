@@ -5,6 +5,14 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authenticateToken, hashPassword, comparePassword, generateJWT } from "./auth";
 import jwt from "jsonwebtoken";
+import Stripe from "stripe";
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
 
 // Admin account that bypasses subscription requirements
 const ADMIN_EMAIL = "sani.ray.red@gmail.com";
@@ -259,6 +267,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating subscription:", error);
       res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  // Stripe payment intent endpoint
+  app.post('/api/create-payment-intent', authenticateUser, async (req: any, res) => {
+    try {
+      const { amount, subscriptionType, description } = req.body;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount), // Amount in FCFA cents
+        currency: "xaf", // Central African CFA franc
+        metadata: {
+          userId: req.user.id,
+          subscriptionType: subscriptionType || "landlord_monthly",
+          description: description || "MbendeStay Landlord Subscription"
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
     }
   });
 

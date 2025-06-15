@@ -14,6 +14,7 @@ import PropertyDetail from "@/pages/property-detail-simple";
 import RegionDetail from "@/pages/region-detail";
 import LandlordDashboard from "@/pages/landlord-dashboard";
 import LandlordRegistration from "@/pages/landlord-registration";
+import LandlordSubscribe from "@/pages/landlord-subscribe";
 import MessagesPage from "@/pages/messages";
 import ChatPage from "@/pages/chat";
 import Subscribe from "@/pages/subscribe";
@@ -34,6 +35,7 @@ function Router() {
           <Route path="/property/:id" component={PropertyDetail} />
           <Route path="/region/:slug" component={RegionDetail} />
           <Route path="/register-landlord" component={LandlordRegistration} />
+          <Route path="/landlord-subscribe" component={LandlordSubscribe} />
         </>
       ) : isAuthenticated ? (
         <>
@@ -43,6 +45,7 @@ function Router() {
           <Route path="/region/:slug" component={RegionDetail} />
           <Route path="/dashboard" component={LandlordDashboard} />
           <Route path="/register-landlord" component={LandlordRegistration} />
+          <Route path="/landlord-subscribe" component={LandlordSubscribe} />
           <Route path="/messages" component={MessagesPage} />
           <Route path="/messages/:id" component={ChatPage} />
         </>
