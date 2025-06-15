@@ -5,7 +5,7 @@ import { Home, Search, Building, User, Menu, X, MessageCircle } from "lucide-rea
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import SimpleLanguageSwitcher, { useLanguage } from "@/components/simple-language-switcher";
-import { useTranslation } from "@/lib/constants";
+import { useTranslation } from "@/lib/translations";
 
 export default function Navigation() {
   const { isAuthenticated, user } = useAuth();
