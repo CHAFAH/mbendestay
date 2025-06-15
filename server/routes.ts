@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { authenticateToken, hashPassword, comparePassword, generateJWT, hasValidSubscription } from "./auth";
+import { authenticateToken, hashPassword, comparePassword, generateJWT } from "./auth";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 
@@ -30,6 +30,22 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Check if user has valid subscription for viewing property details
+  async function hasValidSubscription(userId: string): Promise<boolean> {
+    const user = await storage.getUser(userId);
+    if (!user) return false;
+    
+    // Admin always has access
+    if (user.email === ADMIN_EMAIL) return true;
+    
+    // Check subscription status and expiry
+    if (user.subscriptionStatus === 'active' && user.subscriptionExpiresAt) {
+      return new Date() <= new Date(user.subscriptionExpiresAt);
+    }
+    
+    return false;
+  }
 
   // Custom authentication routes
   app.post('/api/auth/signup', async (req, res) => {
@@ -301,6 +317,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment success endpoint - activates subscription after successful payment
+  app.post('/api/payment/success', authenticateUser, async (req: any, res) => {
+    try {
+      const { paymentIntentId, subscriptionType } = req.body;
+      const userId = req.user.id;
+
+      if (!paymentIntentId) {
+        return res.status(400).json({ message: "Payment intent ID required" });
+      }
+
+      // Verify payment with Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ message: "Payment not successful" });
+      }
+
+      // Calculate subscription expiry date based on type
+      const now = new Date();
+      const subscriptionEndDate = new Date(now);
+      
+      if (subscriptionType === 'renter_monthly') {
+        // Renter monthly subscription - 30 days
+        subscriptionEndDate.setDate(now.getDate() + 30);
+      } else if (subscriptionType === 'landlord_monthly') {
+        // Landlord monthly subscription - 2 months
+        subscriptionEndDate.setMonth(now.getMonth() + 2);
+      } else if (subscriptionType === 'landlord_yearly') {
+        // Landlord yearly subscription - 12 months
+        subscriptionEndDate.setFullYear(now.getFullYear() + 1);
+      } else {
+        // Default to 30 days for any other type
+        subscriptionEndDate.setDate(now.getDate() + 30);
+      }
+
+      // Update user subscription status
+      const updatedUser = await storage.updateUser(userId, {
+        subscriptionStatus: 'active',
+        subscriptionType: subscriptionType,
+        subscriptionExpiresAt: subscriptionEndDate,
+      });
+
+      res.json({
+        message: 'Subscription activated successfully',
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          subscriptionStatus: updatedUser.subscriptionStatus,
+          subscriptionType: updatedUser.subscriptionType,
+          subscriptionExpiresAt: updatedUser.subscriptionExpiresAt
+        }
+      });
+    } catch (error: any) {
+      console.error("Error processing payment success:", error);
+      res.status(500).json({ message: "Failed to activate subscription" });
+    }
+  });
+
   // Get regions
   app.get('/api/regions', async (req, res) => {
     try {
@@ -365,7 +439,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user has valid subscription for viewing sensitive details
       let hasValidSub = false;
       if (req.user?.id) {
-        hasValidSub = await hasValidSubscription(req.user.id);
+        const user = await storage.getUser(req.user.id);
+        if (user) {
+          // Admin always has access
+          if (user.email === ADMIN_EMAIL) {
+            hasValidSub = true;
+          } else if (user.subscriptionStatus === 'active' && user.subscriptionExpiresAt) {
+            hasValidSub = new Date() <= new Date(user.subscriptionExpiresAt);
+          }
+        }
       }
 
       // Filter sensitive information for users without valid subscriptions
