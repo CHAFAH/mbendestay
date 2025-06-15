@@ -204,7 +204,7 @@ export default function Landing() {
                 </li>
               </ul>
               <div className="text-center">
-                <Link href="/register-landlord">
+                <Link href="/landlord-subscribe">
                   <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold">
                     List Your Property
                   </Button>

@@ -87,7 +87,7 @@ export default function LandlordSubscribe() {
         description: `MbendeStay ${type === "landlord_yearly" ? "Yearly" : "Monthly"} Landlord Subscription`
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setClientSecret(data.clientSecret);
     },
     onError: (error: Error) => {
