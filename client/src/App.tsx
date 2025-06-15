@@ -18,6 +18,7 @@ import LandlordSubscribe from "@/pages/landlord-subscribe";
 import MessagesPage from "@/pages/messages";
 import ChatPage from "@/pages/chat";
 import Subscribe from "@/pages/subscribe";
+import Profile from "@/pages/profile";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -48,6 +49,7 @@ function Router() {
           <Route path="/landlord-subscribe" component={LandlordSubscribe} />
           <Route path="/messages" component={MessagesPage} />
           <Route path="/messages/:id" component={ChatPage} />
+          <Route path="/profile" component={Profile} />
         </>
       ) : (
         <div className="min-h-screen flex items-center justify-center">

@@ -37,6 +37,9 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   userType: varchar("user_type").notNull().default("renter"), // "renter" | "landlord"
   phoneNumber: varchar("phone_number"),
+  address: varchar("address"),
+  city: varchar("city"),
+  region: varchar("region"),
   nationalIdFront: varchar("national_id_front"),
   nationalIdBack: varchar("national_id_back"),
   isVerified: boolean("is_verified").default(false),

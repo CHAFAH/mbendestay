@@ -140,6 +140,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.patch('/api/auth/user', async (req: any, res) => {
+    try {
+      // Check authentication
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const token = authHeader.substring(7);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+      
+      // Validate the request body
+      const validatedData = updateUserSchema.parse(req.body);
+      
+      // Update user in database
+      const updatedUser = await storage.updateUser(decoded.id, validatedData);
+      
+      res.json(updatedUser);
+    } catch (error: any) {
+      console.error("Update user error:", error);
+      if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      res.status(400).json({ message: error.message || "Failed to update user" });
+    }
+  });
+
   // Combined auth endpoint that works with both Replit OAuth and custom auth
   app.get('/api/auth/user', async (req: any, res) => {
     // First try custom JWT auth
