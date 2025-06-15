@@ -106,12 +106,17 @@ export default function Navigation() {
                     <span className="text-xs text-primary font-medium">{t('admin')}</span>
                   )}
                 </div>
-                <a 
-                  href="/api/logout"
+                <button
+                  onClick={() => {
+                    // Clear JWT token for custom auth
+                    localStorage.removeItem("auth_token");
+                    // Redirect to Replit logout for OAuth users
+                    window.location.href = "/api/logout";
+                  }}
                   className="text-sm text-neutral-600 hover:text-primary transition-colors font-medium"
                 >
                   {t('logout')}
-                </a>
+                </button>
               </div>
             ) : (
               <div className="flex items-center space-x-3">
