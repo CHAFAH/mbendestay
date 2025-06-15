@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import Login from "@/pages/login";
+import Signup from "@/pages/signup";
 import BrowseProperties from "@/pages/browse-properties";
 import PropertyDetail from "@/pages/property-detail-simple";
 import RegionDetail from "@/pages/region-detail";
@@ -26,6 +28,8 @@ function Router() {
       {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
+          <Route path="/login" component={Login} />
+          <Route path="/signup" component={Signup} />
           <Route path="/browse" component={BrowseProperties} />
           <Route path="/property/:id" component={PropertyDetail} />
           <Route path="/region/:slug" component={RegionDetail} />

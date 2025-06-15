@@ -4,8 +4,10 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authenticateToken, hashPassword, comparePassword, generateJWT } from "./auth";
+
 // Admin account that bypasses subscription requirements
 const ADMIN_EMAIL = "sani.ray.red@gmail.com";
+
 import { 
   insertPropertySchema,
   updatePropertySchema,
@@ -80,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate JWT token
       const token = generateJWT({
         id: user.id,
-        email: user.email,
+        email: user.email || '',
         subscriptionStatus: isAdmin ? 'admin' : (user.subscriptionStatus || 'none')
       });
 
@@ -185,372 +187,322 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: req.user.claims.profile_image_url,
         subscriptionStatus: 'active',
         subscriptionType: validatedData.type,
-        subscriptionExpiresAt: subscriptionEndDate,
+        subscriptionEndDate: subscriptionEndDate,
       });
 
       res.json({
-        message: 'Subscription activated successfully',
-        user: {
-          id: updatedUser.id,
-          email: updatedUser.email,
-          firstName: updatedUser.firstName,
-          lastName: updatedUser.lastName,
-          subscriptionStatus: updatedUser.subscriptionStatus,
-          subscriptionType: updatedUser.subscriptionType,
-          subscriptionEndDate: updatedUser.subscriptionExpiresAt,
-          isAdmin: false
-        }
+        message: 'Subscription created successfully',
+        user: updatedUser
       });
     } catch (error: any) {
-      console.error('Subscription error:', error);
-      res.status(400).json({ message: error.message || 'Failed to create subscription' });
+      console.error("Error creating subscription:", error);
+      res.status(500).json({ message: "Failed to create subscription" });
     }
   });
 
-  // Protected route helper function
-  const requireSubscriptionOrAdmin = async (req: any, res: any, next: any) => {
-    const userEmail = req.user?.claims?.email;
-    const userId = req.user?.claims?.sub;
-    
-    // Admin bypass
-    if (userEmail === ADMIN_EMAIL) {
-      return next();
-    }
-    
-    // Check subscription for non-admin users
-    const user = await storage.getUser(userId);
-    if (!user || user.subscriptionStatus !== 'active') {
-      return res.status(403).json({ 
-        message: 'Active subscription required to access this content',
-        requiresSubscription: true 
-      });
-    }
-    
-    next();
-  };
-
-  // Property routes
-  app.get('/api/properties', async (req, res) => {
-    try {
-      const filters = searchPropertiesSchema.parse(req.query);
-      const result = await storage.getProperties(filters);
-      res.json(result);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-      res.status(500).json({ message: 'Failed to fetch properties' });
-    }
-  });
-
-  // Property detail route - requires subscription for full details
-  app.get('/api/properties/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const property = await storage.getProperty(id);
-      
-      if (!property) {
-        return res.status(404).json({ message: 'Property not found' });
-      }
-
-      // Check if user is authenticated and has subscription/admin access
-      let hasFullAccess = false;
-      if (req.user) {
-        const userEmail = (req.user as any).claims?.email;
-        const userId = (req.user as any).claims?.sub;
-        
-        if (userEmail === ADMIN_EMAIL) {
-          hasFullAccess = true;
-        } else {
-          const user = await storage.getUser(userId);
-          hasFullAccess = user?.subscriptionStatus === 'active';
-        }
-      }
-
-      // Return limited data for non-subscribers
-      if (!hasFullAccess) {
-        const limitedProperty = {
-          ...property,
-          address: 'Subscription required to view exact location',
-          landlord: {
-            ...property.landlord,
-            email: 'Subscribe to contact landlord',
-            phone: 'Subscribe to view phone number'
-          }
-        };
-        return res.json({ ...limitedProperty, requiresSubscription: true });
-      }
-
-      res.json(property);
-    } catch (error) {
-      console.error('Error fetching property:', error);
-      res.status(500).json({ message: 'Failed to fetch property' });
-    }
-  });
-
-  // Landlord dashboard routes (require authentication)
-  app.get('/api/landlord/properties', isAuthenticated, async (req: any, res) => {
-    try {
-      const landlordId = req.user.claims.sub;
-      const properties = await storage.getPropertiesByLandlord(landlordId);
-      res.json(properties);
-    } catch (error) {
-      console.error('Error fetching landlord properties:', error);
-      res.status(500).json({ message: 'Failed to fetch properties' });
-    }
-  });
-
-  app.post('/api/properties', isAuthenticated, async (req: any, res) => {
-    try {
-      const validatedData = insertPropertySchema.parse(req.body);
-      const landlordId = req.user.claims.sub;
-      
-      const property = await storage.createProperty({
-        ...validatedData,
-        landlordId,
-      });
-      
-      res.status(201).json(property);
-    } catch (error: any) {
-      console.error('Error creating property:', error);
-      res.status(400).json({ message: error.message || 'Failed to create property' });
-    }
-  });
-
-  app.put('/api/properties/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const landlordId = req.user.claims.sub;
-      const validatedData = updatePropertySchema.parse(req.body);
-      
-      // Verify ownership
-      const existingProperty = await storage.getProperty(id);
-      if (!existingProperty || existingProperty.landlordId !== landlordId) {
-        return res.status(403).json({ message: 'Not authorized to update this property' });
-      }
-      
-      const property = await storage.updateProperty(id, validatedData);
-      res.json(property);
-    } catch (error: any) {
-      console.error('Error updating property:', error);
-      res.status(400).json({ message: error.message || 'Failed to update property' });
-    }
-  });
-
-  app.delete('/api/properties/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const landlordId = req.user.claims.sub;
-      
-      // Verify ownership
-      const existingProperty = await storage.getProperty(id);
-      if (!existingProperty || existingProperty.landlordId !== landlordId) {
-        return res.status(403).json({ message: 'Not authorized to delete this property' });
-      }
-      
-      await storage.deleteProperty(id);
-      res.json({ message: 'Property deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting property:', error);
-      res.status(500).json({ message: 'Failed to delete property' });
-    }
-  });
-
-  // Regions and divisions
+  // Get regions
   app.get('/api/regions', async (req, res) => {
     try {
       const regions = await storage.getRegions();
       res.json(regions);
     } catch (error) {
-      console.error('Error fetching regions:', error);
-      res.status(500).json({ message: 'Failed to fetch regions' });
+      console.error("Error fetching regions:", error);
+      res.status(500).json({ message: "Failed to fetch regions" });
     }
   });
 
+  // Get divisions by region
   app.get('/api/regions/:regionId/divisions', async (req, res) => {
     try {
       const regionId = parseInt(req.params.regionId);
       const divisions = await storage.getDivisionsByRegion(regionId);
       res.json(divisions);
     } catch (error) {
-      console.error('Error fetching divisions:', error);
-      res.status(500).json({ message: 'Failed to fetch divisions' });
+      console.error("Error fetching divisions:", error);
+      res.status(500).json({ message: "Failed to fetch divisions" });
     }
   });
 
-  // Inquiry routes (require subscription for landlord contact)
-  app.post('/api/inquiries', isAuthenticated, requireSubscriptionOrAdmin, async (req: any, res) => {
+  // Search properties
+  app.get('/api/properties', async (req, res) => {
+    try {
+      const filters = searchPropertiesSchema.parse(req.query);
+      const result = await storage.getProperties(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error searching properties:", error);
+      res.status(500).json({ message: "Failed to search properties" });
+    }
+  });
+
+  // Get property by ID
+  app.get('/api/properties/:id', async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      const property = await storage.getProperty(propertyId);
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      res.json(property);
+    } catch (error) {
+      console.error("Error fetching property:", error);
+      res.status(500).json({ message: "Failed to fetch property" });
+    }
+  });
+
+  // Get properties by landlord
+  app.get('/api/landlord/properties', isAuthenticated, async (req: any, res) => {
+    try {
+      const landlordId = req.user.claims.sub;
+      const properties = await storage.getPropertiesByLandlord(landlordId);
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching landlord properties:", error);
+      res.status(500).json({ message: "Failed to fetch properties" });
+    }
+  });
+
+  // Create property
+  app.post('/api/properties', isAuthenticated, async (req: any, res) => {
+    try {
+      const landlordId = req.user.claims.sub;
+      const validatedData = insertPropertySchema.parse(req.body);
+      
+      const property = await storage.createProperty({
+        ...validatedData,
+        landlordId,
+      });
+
+      res.status(201).json(property);
+    } catch (error: any) {
+      console.error("Error creating property:", error);
+      res.status(400).json({ message: error.message || "Failed to create property" });
+    }
+  });
+
+  // Update property
+  app.patch('/api/properties/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      const landlordId = req.user.claims.sub;
+      
+      // Check if property belongs to landlord
+      const existingProperty = await storage.getProperty(propertyId);
+      if (!existingProperty || existingProperty.landlordId !== landlordId) {
+        return res.status(403).json({ message: "Unauthorized to update this property" });
+      }
+
+      const validatedData = updatePropertySchema.parse(req.body);
+      const updatedProperty = await storage.updateProperty(propertyId, validatedData);
+      
+      res.json(updatedProperty);
+    } catch (error: any) {
+      console.error("Error updating property:", error);
+      res.status(400).json({ message: error.message || "Failed to update property" });
+    }
+  });
+
+  // Delete property
+  app.delete('/api/properties/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      const landlordId = req.user.claims.sub;
+      
+      // Check if property belongs to landlord
+      const existingProperty = await storage.getProperty(propertyId);
+      if (!existingProperty || existingProperty.landlordId !== landlordId) {
+        return res.status(403).json({ message: "Unauthorized to delete this property" });
+      }
+
+      await storage.deleteProperty(propertyId);
+      res.json({ message: "Property deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting property:", error);
+      res.status(400).json({ message: error.message || "Failed to delete property" });
+    }
+  });
+
+  // Create inquiry
+  app.post('/api/inquiries', async (req, res) => {
     try {
       const validatedData = insertInquirySchema.parse(req.body);
-      const renterId = req.user.claims.sub;
-      
-      const inquiry = await storage.createInquiry({
-        ...validatedData,
-        renterId,
-      });
-      
+      const inquiry = await storage.createInquiry(validatedData);
       res.status(201).json(inquiry);
     } catch (error: any) {
-      console.error('Error creating inquiry:', error);
-      res.status(400).json({ message: error.message || 'Failed to create inquiry' });
+      console.error("Error creating inquiry:", error);
+      res.status(400).json({ message: error.message || "Failed to create inquiry" });
     }
   });
 
+  // Get inquiries by property
+  app.get('/api/properties/:id/inquiries', isAuthenticated, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      const landlordId = req.user.claims.sub;
+      
+      // Check if property belongs to landlord
+      const property = await storage.getProperty(propertyId);
+      if (!property || property.landlordId !== landlordId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const inquiries = await storage.getInquiriesByProperty(propertyId);
+      res.json(inquiries);
+    } catch (error) {
+      console.error("Error fetching inquiries:", error);
+      res.status(500).json({ message: "Failed to fetch inquiries" });
+    }
+  });
+
+  // Get all inquiries for landlord
   app.get('/api/landlord/inquiries', isAuthenticated, async (req: any, res) => {
     try {
       const landlordId = req.user.claims.sub;
       const inquiries = await storage.getInquiriesByLandlord(landlordId);
       res.json(inquiries);
     } catch (error) {
-      console.error('Error fetching inquiries:', error);
-      res.status(500).json({ message: 'Failed to fetch inquiries' });
+      console.error("Error fetching landlord inquiries:", error);
+      res.status(500).json({ message: "Failed to fetch inquiries" });
     }
   });
 
-  // Review routes
+  // Create review
   app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
-      const validatedData = insertReviewSchema.parse(req.body);
       const reviewerId = req.user.claims.sub;
+      const reviewerEmail = req.user.claims.email;
+      const validatedData = insertReviewSchema.parse(req.body);
       
       const review = await storage.createReview({
         ...validatedData,
         reviewerId,
+        reviewerEmail,
       });
-      
+
       res.status(201).json(review);
     } catch (error: any) {
-      console.error('Error creating review:', error);
-      res.status(400).json({ message: error.message || 'Failed to create review' });
+      console.error("Error creating review:", error);
+      res.status(400).json({ message: error.message || "Failed to create review" });
     }
   });
 
-  app.get('/api/properties/:propertyId/reviews', async (req, res) => {
+  // Get reviews by property
+  app.get('/api/properties/:id/reviews', async (req, res) => {
     try {
-      const propertyId = parseInt(req.params.propertyId);
+      const propertyId = parseInt(req.params.id);
       const reviews = await storage.getReviewsByProperty(propertyId);
       res.json(reviews);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
-      res.status(500).json({ message: 'Failed to fetch reviews' });
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
     }
   });
 
-  app.get('/api/properties/:propertyId/rating-stats', async (req, res) => {
+  // Get property rating stats
+  app.get('/api/properties/:id/rating-stats', async (req, res) => {
     try {
-      const propertyId = parseInt(req.params.propertyId);
+      const propertyId = parseInt(req.params.id);
       const stats = await storage.getPropertyRatingStats(propertyId);
       res.json(stats);
     } catch (error) {
-      console.error('Error fetching rating stats:', error);
-      res.status(500).json({ message: 'Failed to fetch rating stats' });
+      console.error("Error fetching rating stats:", error);
+      res.status(500).json({ message: "Failed to fetch rating stats" });
     }
   });
 
-  app.delete('/api/reviews/:reviewId', isAuthenticated, async (req: any, res) => {
+  // Delete review
+  app.delete('/api/reviews/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const reviewId = parseInt(req.params.reviewId);
+      const reviewId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
       
       await storage.deleteReview(reviewId, userId);
-      res.json({ message: 'Review deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting review:', error);
-      res.status(500).json({ message: 'Failed to delete review' });
+      res.json({ message: "Review deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting review:", error);
+      res.status(400).json({ message: error.message || "Failed to delete review" });
     }
   });
 
-  // Messaging routes (require subscription)
-  app.post('/api/conversations', isAuthenticated, requireSubscriptionOrAdmin, async (req: any, res) => {
-    try {
-      const { propertyId, landlordId } = req.body;
-      const renterId = req.user.claims.sub;
-      
-      const conversation = await storage.getOrCreateConversation(propertyId, landlordId, renterId);
-      res.json(conversation);
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-      res.status(500).json({ message: 'Failed to create conversation' });
-    }
-  });
-
+  // Get conversations for user
   app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const conversations = await storage.getConversationsByUser(userId);
       res.json(conversations);
     } catch (error) {
-      console.error('Error fetching conversations:', error);
-      res.status(500).json({ message: 'Failed to fetch conversations' });
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
     }
   });
 
-  app.get('/api/conversations/:conversationId', isAuthenticated, async (req: any, res) => {
+  // Get specific conversation
+  app.get('/api/conversations/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const conversationId = parseInt(req.params.conversationId);
+      const conversationId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
       
       const conversation = await storage.getConversation(conversationId, userId);
       if (!conversation) {
-        return res.status(404).json({ message: 'Conversation not found' });
+        return res.status(404).json({ message: "Conversation not found" });
       }
-      
+
       res.json(conversation);
     } catch (error) {
-      console.error('Error fetching conversation:', error);
-      res.status(500).json({ message: 'Failed to fetch conversation' });
+      console.error("Error fetching conversation:", error);
+      res.status(500).json({ message: "Failed to fetch conversation" });
     }
   });
 
-  app.post('/api/conversations/:conversationId/messages', isAuthenticated, async (req: any, res) => {
+  // Send message
+  app.post('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const conversationId = parseInt(req.params.conversationId);
+      const conversationId = parseInt(req.params.id);
       const senderId = req.user.claims.sub;
       const { content } = req.body;
-      
+
+      if (!content || content.trim() === '') {
+        return res.status(400).json({ message: "Message content is required" });
+      }
+
       const message = await storage.sendMessage({
         conversationId,
         senderId,
-        content,
+        content: content.trim(),
       });
-      
+
       res.status(201).json(message);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      res.status(500).json({ message: 'Failed to send message' });
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      res.status(400).json({ message: error.message || "Failed to send message" });
     }
   });
 
-  app.get('/api/conversations/:conversationId/messages', isAuthenticated, async (req: any, res) => {
+  // Mark messages as read
+  app.patch('/api/conversations/:id/read', isAuthenticated, async (req: any, res) => {
     try {
-      const conversationId = parseInt(req.params.conversationId);
-      const messages = await storage.getMessagesByConversation(conversationId);
-      res.json(messages);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      res.status(500).json({ message: 'Failed to fetch messages' });
-    }
-  });
-
-  app.patch('/api/conversations/:conversationId/read', isAuthenticated, async (req: any, res) => {
-    try {
-      const conversationId = parseInt(req.params.conversationId);
+      const conversationId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
       
       await storage.markMessagesAsRead(conversationId, userId);
-      res.json({ message: 'Messages marked as read' });
-    } catch (error) {
-      console.error('Error marking messages as read:', error);
-      res.status(500).json({ message: 'Failed to mark messages as read' });
+      res.json({ message: "Messages marked as read" });
+    } catch (error: any) {
+      console.error("Error marking messages as read:", error);
+      res.status(400).json({ message: error.message || "Failed to mark messages as read" });
     }
   });
 
-  app.get('/api/unread-count', isAuthenticated, async (req: any, res) => {
+  // Get unread message count
+  app.get('/api/messages/unread-count', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const count = await storage.getUnreadMessageCount(userId);
       res.json({ count });
     } catch (error) {
-      console.error('Error fetching unread count:', error);
-      res.status(500).json({ message: 'Failed to fetch unread count' });
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
     }
   });
 
@@ -560,29 +512,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
   wss.on('connection', (ws: WebSocket, req) => {
-    console.log('WebSocket connection established');
+    console.log('WebSocket client connected');
 
-    ws.on('message', (message) => {
+    ws.on('message', async (data) => {
       try {
-        const data = JSON.parse(message.toString());
+        const message = JSON.parse(data.toString());
         
-        // Broadcast message to all connected clients
-        wss.clients.forEach((client) => {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(data));
-          }
-        });
+        if (message.type === 'join') {
+          // Join a conversation room
+          (ws as any).conversationId = message.conversationId;
+          (ws as any).userId = message.userId;
+        }
+        
+        if (message.type === 'message') {
+          // Broadcast message to other clients in the same conversation
+          wss.clients.forEach((client) => {
+            if (client !== ws && 
+                client.readyState === WebSocket.OPEN &&
+                (client as any).conversationId === message.conversationId) {
+              client.send(JSON.stringify({
+                type: 'message',
+                data: message.data
+              }));
+            }
+          });
+        }
       } catch (error) {
         console.error('WebSocket message error:', error);
       }
     });
 
     ws.on('close', () => {
-      console.log('WebSocket connection closed');
-    });
-
-    ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      console.log('WebSocket client disconnected');
     });
   });
 
