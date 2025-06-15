@@ -90,12 +90,13 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(userData: { id: string; email: string; password: string; firstName: string; lastName: string; username: string; userType: string; phoneNumber?: string; }): Promise<User> {
+  async createUser(userData: { id: string; email: string; password: string; firstName: string; lastName: string; username: string; userType: string; phoneNumber?: string; subscriptionType?: string; }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values({
         ...userData,
         userType: userData.userType as "renter" | "landlord",
+        subscriptionType: userData.subscriptionType,
       })
       .returning();
     return user;

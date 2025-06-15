@@ -16,7 +16,8 @@ import { z } from "zod";
 import Navigation from "@/components/navigation";
 
 const clientSignupSchema = signupSchema.extend({
-  confirmPassword: z.string()
+  confirmPassword: z.string(),
+  userType: z.enum(["renter", "landlord", "landlord_yearly"], { required_error: "Please select account type" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
@@ -96,7 +97,8 @@ export default function Signup() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
             <CardDescription>
-              Join MbendeStay to {watchedUserType === "renter" ? "find your perfect accommodation" : "list your properties"}
+              Join MbendeStay to {watchedUserType === "renter" ? "find your perfect accommodation" : 
+                                watchedUserType === "landlord_yearly" ? "list your properties yearly" : "list your properties"}
             </CardDescription>
           </CardHeader>
           
