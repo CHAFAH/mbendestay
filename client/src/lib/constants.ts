@@ -160,6 +160,30 @@ export function useTranslation(lang: 'en' | 'fr' = 'en') {
         en: "Yearly Subscription",
         fr: "Abonnement Annuel"
       },
+      temperature: {
+        en: "Temperature:",
+        fr: "Température:"
+      },
+      population: {
+        en: "Population:",
+        fr: "Population:"
+      },
+      popularLocations: {
+        en: "Popular Locations:",
+        fr: "Lieux Populaires:"
+      },
+      keyAttractions: {
+        en: "Key Attractions:",
+        fr: "Attractions Principales:"
+      },
+      exploreProperties: {
+        en: "Explore Properties",
+        fr: "Explorer les Propriétés"
+      },
+      viewAllRegionsProperties: {
+        en: "View All Regions & Properties",
+        fr: "Voir Toutes les Régions et Propriétés"
+      },
       chooseMonthly: {
         en: "Choose Monthly",
         fr: "Choisir Mensuel"

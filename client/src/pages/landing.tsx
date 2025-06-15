@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { SUBSCRIPTION_PLANS, useTranslation } from "@/lib/constants";
+import { REGIONS_DATA } from "@/lib/regions-data";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -169,30 +170,86 @@ export default function Landing() {
         <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
           <div className="text-center mb-12">
             <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
-              Explore Cameroon's Regions
+              {t('exploreRegions')}
             </h2>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-              From the coastal beauty of Littoral to the cultural richness of the West, discover accommodations across all 10 regions
+            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+              {t('exploreRegionsSubtitle')}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6">
-            {regions.slice(0, 5).map((region: any) => (
-              <div key={region.id} className="group cursor-pointer">
-                <div className="relative overflow-hidden rounded-xl mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {REGIONS_DATA.slice(0, 8).map((region) => (
+              <div key={region.id} className="group cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <div className="relative overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                    src={region.imageUrl} 
                     alt={`${region.name} region landscape`} 
-                    className="w-full h-32 object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3">
+                    <h3 className="font-bold text-xl text-white mb-1">
+                      {region.name}
+                    </h3>
+                    <p className="text-sm text-white/90">{region.capital}</p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg text-neutral-800 group-hover:text-primary transition-colors">
-                  {region.name}
-                </h3>
-                <p className="text-sm text-neutral-600">Explore properties</p>
+                
+                <div className="p-5">
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                    <div>
+                      <span className="text-neutral-500">{t('temperature')}</span>
+                      <p className="font-medium text-neutral-800">{region.temperature}</p>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500">{t('population')}</span>
+                      <p className="font-medium text-neutral-800">{region.population}</p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-neutral-600 mb-4 line-clamp-3">
+                    {region.description[language]}
+                  </p>
+                  
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-sm text-neutral-800 mb-2">{t('popularLocations')}</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {region.popularLocations.slice(0, 3).map((location, index) => (
+                        <span key={index} className="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded-full">
+                          {location}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-sm text-neutral-800 mb-2">{t('keyAttractions')}</h4>
+                    <ul className="text-xs text-neutral-600 space-y-1">
+                      {region.attractions.slice(0, 2).map((attraction, index) => (
+                        <li key={index} className="flex items-center">
+                          <span className="w-1 h-1 bg-primary rounded-full mr-2"></span>
+                          {attraction}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <Link href={`/browse?region=${region.slug}`}>
+                    <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-white transition-colors">
+                      {t('exploreProperties')}
+                    </Button>
+                  </Link>
+                </div>
               </div>
             ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Link href="/browse">
+              <Button size="lg" className="px-8">
+                {t('viewAllRegionsProperties')}
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

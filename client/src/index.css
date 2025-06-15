@@ -100,3 +100,11 @@
   .border-neutral-200 { border-color: var(--neutral-200); }
   .border-neutral-300 { border-color: var(--neutral-300); }
 }
+
+/* Text truncation utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
