@@ -33,7 +33,9 @@ export const users = pgTable("users", {
   password: varchar("password"), // For local authentication
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  username: varchar("username").unique(),
   profileImageUrl: varchar("profile_image_url"),
+  userType: varchar("user_type").notNull().default("renter"), // "renter" | "landlord"
   phoneNumber: varchar("phone_number"),
   nationalIdFront: varchar("national_id_front"),
   nationalIdBack: varchar("national_id_back"),
@@ -243,6 +245,9 @@ export const signupSchema = z.object({
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters").regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+  userType: z.enum(["renter", "landlord"], { required_error: "Please select account type" }),
+  phoneNumber: z.string().optional(),
 });
 
 export const loginSchema = z.object({
