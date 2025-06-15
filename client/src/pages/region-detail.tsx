@@ -24,14 +24,8 @@ export default function RegionDetail() {
   const regionData = getRegionData(slug || '');
   
   const { data: properties } = useQuery({
-    queryKey: ["/api/properties", { region: slug }],
+    queryKey: ["/api/properties", { regionSlug: slug }],
   });
-
-  const { data: regions } = useQuery({
-    queryKey: ["/api/regions"],
-  });
-
-  const region = regions?.find((r: any) => r.slug === slug);
 
   if (!regionData) {
     return (

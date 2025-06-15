@@ -57,8 +57,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Property routes
   app.get('/api/properties', async (req, res) => {
     try {
+      // Handle region slug to ID conversion
+      let regionId = req.query.regionId ? parseInt(req.query.regionId as string) : undefined;
+      
+      if (req.query.regionSlug && !regionId) {
+        const regions = await storage.getRegions();
+        const region = regions.find(r => r.slug === req.query.regionSlug);
+        regionId = region?.id;
+      }
+
       const filters = searchPropertiesSchema.parse({
-        regionId: req.query.regionId ? parseInt(req.query.regionId as string) : undefined,
+        regionId,
         divisionId: req.query.divisionId ? parseInt(req.query.divisionId as string) : undefined,
         propertyType: req.query.propertyType,
         contractType: req.query.contractType,
