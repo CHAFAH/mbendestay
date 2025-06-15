@@ -14,12 +14,19 @@ import LandlordDashboard from "@/pages/landlord-dashboard";
 import LandlordRegistration from "@/pages/landlord-registration";
 import MessagesPage from "@/pages/messages";
 import ChatPage from "@/pages/chat";
+import Signup from "@/pages/signup";
+import Login from "@/pages/login";
+import Subscribe from "@/pages/subscribe";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
+      <Route path="/signup" component={Signup} />
+      <Route path="/login" component={Login} />
+      <Route path="/subscribe" component={Subscribe} />
+      
       {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
