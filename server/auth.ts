@@ -70,12 +70,47 @@ export async function requireSubscription(req: AuthenticatedRequest, res: Respon
     return res.status(401).json({ message: "Authentication required" });
   }
 
-  if (req.user.subscriptionStatus !== "active") {
+  // Check if this is the admin account
+  const ADMIN_EMAIL = "sani.ray.red@gmail.com";
+  if (req.user.email === ADMIN_EMAIL) {
+    return next(); // Admin bypasses subscription check
+  }
+
+  // Get full user data to check subscription expiry
+  const user = await storage.getUser(req.user.id);
+  if (!user || user.subscriptionStatus !== 'active') {
     return res.status(403).json({ 
       message: "Active subscription required",
       subscriptionRequired: true 
     });
   }
 
+  // Check if subscription has expired
+  if (user.subscriptionExpiresAt && new Date() > new Date(user.subscriptionExpiresAt)) {
+    // Mark subscription as expired
+    await storage.updateUser(req.user.id, { subscriptionStatus: 'expired' });
+    return res.status(403).json({ 
+      message: "Subscription expired. Please renew to continue accessing properties.",
+      subscriptionExpired: true 
+    });
+  }
+
   next();
+}
+
+// Check if user has valid subscription for viewing property details
+export async function hasValidSubscription(userId: string): Promise<boolean> {
+  const user = await storage.getUser(userId);
+  if (!user) return false;
+  
+  // Admin always has access
+  const ADMIN_EMAIL = "sani.ray.red@gmail.com";
+  if (user.email === ADMIN_EMAIL) return true;
+  
+  // Check subscription status and expiry
+  if (user.subscriptionStatus === 'active' && user.subscriptionExpiresAt) {
+    return new Date() <= new Date(user.subscriptionExpiresAt);
+  }
+  
+  return false;
 }

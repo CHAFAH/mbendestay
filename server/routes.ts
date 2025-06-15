@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { authenticateToken, hashPassword, comparePassword, generateJWT } from "./auth";
+import { authenticateToken, hashPassword, comparePassword, generateJWT, hasValidSubscription } from "./auth";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 
@@ -353,13 +353,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get property by ID
-  app.get('/api/properties/:id', async (req, res) => {
+  app.get('/api/properties/:id', async (req: any, res) => {
     try {
       const propertyId = parseInt(req.params.id);
       const property = await storage.getProperty(propertyId);
       
       if (!property) {
         return res.status(404).json({ message: "Property not found" });
+      }
+
+      // Check if user has valid subscription for viewing sensitive details
+      let hasValidSub = false;
+      if (req.user?.id) {
+        hasValidSub = await hasValidSubscription(req.user.id);
+      }
+
+      // Filter sensitive information for users without valid subscriptions
+      if (!hasValidSub) {
+        const filteredProperty = {
+          ...property,
+          // Hide exact address, only show general area
+          address: property.address ? 
+            property.address.split(',').slice(-2).join(',').trim() : // Keep only city/region
+            property.address,
+          // Hide landlord contact details
+          landlord: {
+            ...property.landlord,
+            email: undefined,
+            phoneNumber: undefined,
+            profileImageUrl: property.landlord?.profileImageUrl || null,
+            firstName: property.landlord?.firstName || "Landlord",
+            lastName: property.landlord?.lastName ? property.landlord.lastName[0] + "..." : "",
+          }
+        };
+        
+        return res.json({
+          ...filteredProperty,
+          subscriptionRequired: true,
+          message: "Subscribe to view complete property details including landlord contact information and exact address."
+        });
       }
 
       res.json(property);
