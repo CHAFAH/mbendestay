@@ -48,20 +48,20 @@ export const AMENITIES = [
 export const SUBSCRIPTION_PLANS = {
   // For landlords to list properties
   landlord_monthly: {
-    price: 15000,
+    price: 10000,
     duration: "month",
     type: "landlord",
-    listingDuration: 1, // month
+    listingDuration: 2, // months
     features: {
       en: [
-        "List unlimited properties",
+        "Properties listed for 2 months",
         "Photo and video uploads",
         "Tenant messaging system",
         "Basic property analytics",
         "Monthly subscription",
       ],
       fr: [
-        "Lister des propriétés illimitées",
+        "Propriétés listées pendant 2 mois",
         "Téléchargement de photos et vidéos",
         "Système de messagerie locataires",
         "Analyses de base des propriétés",
@@ -70,31 +70,31 @@ export const SUBSCRIPTION_PLANS = {
     },
   },
   landlord_yearly: {
-    price: 150000,
+    price: 80000,
     duration: "year",
     type: "landlord",
     listingDuration: 12, // months
     features: {
       en: [
-        "List unlimited properties",
+        "Properties listed for 12 months",
         "Priority listing placement",
         "Advanced property analytics",
         "Tenant messaging system",
         "Photo and video uploads",
-        "Yearly subscription savings",
+        "Save 40,000 FCFA yearly",
       ],
       fr: [
-        "Lister des propriétés illimitées",
+        "Propriétés listées pendant 12 mois",
         "Placement d'annonce prioritaire",
         "Analyses avancées des propriétés",
         "Système de messagerie locataires",
         "Téléchargement de photos et vidéos",
-        "Économies d'abonnement annuel",
+        "Économisez 40,000 FCFA par an",
       ]
     },
     savings: {
-      en: "Save 17%",
-      fr: "Économisez 17%"
+      en: "Save 40,000 FCFA",
+      fr: "Économisez 40,000 FCFA"
     },
   },
   // For renters to browse properties (paid)

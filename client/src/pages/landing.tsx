@@ -143,7 +143,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {/* For Renters */}
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200">
               <div className="text-center mb-6">
@@ -172,27 +172,21 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* For Landlords */}
+            {/* For Landlords - Monthly */}
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200">
               <div className="text-center mb-6">
                 <Building className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h3 className="font-bold text-2xl text-neutral-800 mb-2">List Properties</h3>
-                <p className="text-neutral-600">Rent out your properties to tenants</p>
+                <h3 className="font-bold text-2xl text-neutral-800 mb-2">Monthly Plan</h3>
+                <p className="text-neutral-600">List properties for 2 months</p>
               </div>
               <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-primary mb-2">
-                  {SUBSCRIPTION_PLANS.landlord_monthly.price.toLocaleString()} FCFA
-                </div>
-                <span className="text-lg text-neutral-600">to list properties</span>
+                <div className="text-4xl font-bold text-primary mb-2">10,000 FCFA</div>
+                <span className="text-lg text-neutral-600">Per month</span>
               </div>
               <ul className="space-y-3 text-neutral-700 mb-6">
                 <li className="flex items-center">
                   <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Monthly: Properties listed for 2 months</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
-                  <span>Yearly: Properties listed for 12 months</span>
+                  <span>Properties listed for 2 months</span>
                 </li>
                 <li className="flex items-center">
                   <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
@@ -202,11 +196,57 @@ export default function Landing() {
                   <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
                   <span>Direct tenant messaging</span>
                 </li>
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Basic property analytics</span>
+                </li>
               </ul>
               <div className="text-center">
                 <Link href="/landlord-subscribe">
                   <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold">
-                    List Your Property
+                    Choose Monthly
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* For Landlords - Yearly */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200 relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span className="bg-green-600 text-white px-4 py-1 rounded-full text-sm font-medium">Best Value</span>
+              </div>
+              <div className="text-center mb-6">
+                <Building className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h3 className="font-bold text-2xl text-neutral-800 mb-2">Yearly Plan</h3>
+                <p className="text-neutral-600">List properties for 12 months</p>
+              </div>
+              <div className="text-center mb-6">
+                <div className="text-4xl font-bold text-primary mb-2">80,000 FCFA</div>
+                <span className="text-lg text-neutral-600">Per year</span>
+                <div className="text-sm text-green-600 font-medium mt-1">Save 40,000 FCFA</div>
+              </div>
+              <ul className="space-y-3 text-neutral-700 mb-6">
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Properties listed for 12 months</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Priority listing placement</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Photo & video uploads</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Advanced property analytics</span>
+                </li>
+              </ul>
+              <div className="text-center">
+                <Link href="/landlord-subscribe">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold">
+                    Choose Yearly
                   </Button>
                 </Link>
               </div>

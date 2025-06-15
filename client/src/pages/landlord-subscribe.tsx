@@ -66,7 +66,7 @@ function PaymentForm({ subscriptionType }: { subscriptionType: string }) {
         disabled={!stripe || isProcessing}
         className="w-full bg-primary hover:bg-primary/90"
       >
-        {isProcessing ? "Processing..." : `Pay ${subscriptionType === "landlord_yearly" ? "150,000" : "15,000"} FCFA`}
+        {isProcessing ? "Processing..." : `Pay ${subscriptionType === "landlord_yearly" ? "80,000" : "10,000"} FCFA`}
       </Button>
     </form>
   );
@@ -80,7 +80,7 @@ export default function LandlordSubscribe() {
 
   const createPaymentMutation = useMutation({
     mutationFn: async (type: string) => {
-      const amount = type === "landlord_yearly" ? 150000 : 15000;
+      const amount = type === "landlord_yearly" ? 80000 : 10000;
       return await apiRequest("POST", "/api/create-payment-intent", { 
         amount,
         subscriptionType: type,
