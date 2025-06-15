@@ -1,91 +1,64 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { User, MapPin, Mail, Phone, Edit, Save, ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { updateUserSchema } from "@shared/schema";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import Navigation from "@/components/navigation";
-import { CAMEROON_REGIONS } from "@/lib/constants";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Mail, Phone, MapPin, Building } from "lucide-react";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { z } from "zod";
 
-type ProfileFormData = z.infer<typeof updateUserSchema>;
+interface ProfileFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+}
 
 export default function Profile() {
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Redirect unauthorized users
-  useEffect(() => {
-    if (!authLoading && !user) {
-      toast({
-        title: "Unauthorized",
-        description: "You need to login to access your profile.",
-        variant: "destructive",
-      });
-      setLocation("/login?redirect=/profile");
-    }
-  }, [user, authLoading, setLocation, toast]);
-
-  const { data: userProfile, isLoading: profileLoading } = useQuery({
-    queryKey: ["/api/auth/user"],
-    enabled: !!user,
-    retry: false,
+  
+  const [formData, setFormData] = useState<ProfileFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
   });
 
-  const form = useForm<ProfileFormData>({
-    resolver: zodResolver(updateUserSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phoneNumber: "",
-      address: "",
-      city: "",
-      region: "",
-    },
-  });
-
-  // Update form when user data loads
+  // Initialize form data when user loads
   useEffect(() => {
-    if (userProfile) {
-      const userData = userProfile as any;
-      form.reset({
-        firstName: userData.firstName || "",
-        lastName: userData.lastName || "",
-        email: userData.email || "",
-        phoneNumber: userData.phoneNumber || "",
-        address: userData.address || "",
-        city: userData.city || "",
-        region: userData.region || "",
+    if (user) {
+      setFormData({
+        firstName: (user as any)?.firstName || "",
+        lastName: (user as any)?.lastName || "",
+        email: (user as any)?.email || "",
+        phoneNumber: (user as any)?.phoneNumber || "",
+        address: (user as any)?.address || "",
+        city: (user as any)?.city || "",
       });
     }
-  }, [userProfile, form]);
+  }, [user]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
-      const response = await apiRequest("PATCH", "/api/auth/user", data);
+      const response = await apiRequest("PUT", "/api/auth/user", data);
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
       });
-      // Invalidate user data to refresh
+      // Invalidate user query to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error: Error) => {
@@ -101,254 +74,190 @@ export default function Profile() {
         return;
       }
       toast({
-        title: "Update failed",
-        description: error.message,
+        title: "Update Failed",
+        description: error.message || "Failed to update profile",
         variant: "destructive",
       });
     },
   });
 
-  const onSubmit = (data: ProfileFormData) => {
-    updateProfileMutation.mutate(data);
+  const handleInputChange = (field: keyof ProfileFormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  if (authLoading || profileLoading) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate(formData);
+  };
+
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  if (!user || !userProfile) {
-    return null;
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-red-600">Access Denied</CardTitle>
+            <CardDescription>
+              Please log in to access your profile settings.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <Navigation />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setLocation("/")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile Settings</h1>
-              <p className="text-gray-600 dark:text-gray-300">Manage your personal information</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
+          <p className="text-gray-600 mt-2">
+            Update your personal information and account preferences
+          </p>
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Personal Information
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* User Info Card */}
+          <Card className="lg:col-span-1">
+            <CardHeader className="text-center">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                {(user as any)?.profileImageUrl ? (
+                  <img 
+                    src={(user as any).profileImageUrl} 
+                    alt="Profile" 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <User className="w-10 h-10 text-primary" />
+                )}
+              </div>
+              <CardTitle className="text-lg">
+                {(user as any)?.firstName || (user as any)?.email}
               </CardTitle>
+              <CardDescription className="capitalize">
+                {(user as any)?.userType || "User"} Account
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Basic Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your first name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Mail className="w-4 h-4" />
+                  <span>{(user as any)?.email}</span>
+                </div>
+                {(user as any)?.phoneNumber && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Phone className="w-4 h-4" />
+                    <span>{(user as any).phoneNumber}</span>
+                  </div>
+                )}
+                {((user as any)?.subscriptionStatus === "active" || (user as any)?.isAdmin) && (
+                  <div className="flex items-center gap-2 text-sm text-green-600">
+                    <Building className="w-4 h-4" />
+                    <span>Premium Access</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your last name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+          {/* Profile Form */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Personal Information</CardTitle>
+              <CardDescription>
+                Update your personal details below
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange("firstName", e.target.value)}
+                      placeholder="Enter your first name"
                     />
                   </div>
-
-                  <Separator />
-
-                  {/* Contact Info */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Contact Information
-                    </h3>
-                    
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="Enter your email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Enter your phone number (e.g., +237 6XX XXX XXX)" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange("lastName", e.target.value)}
+                      placeholder="Enter your last name"
                     />
                   </div>
+                </div>
 
-                  <Separator />
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder="Enter your email address"
+                  />
+                </div>
 
-                  {/* Address Info */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Address Information
-                    </h3>
-                    
-                    <FormField
-                      control={form.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Street Address</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Enter your street address"
-                              className="min-h-[80px]"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input
+                    id="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                    placeholder="Enter your phone number"
+                  />
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="city"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>City</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter your city" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    placeholder="Enter your full address"
+                    className="min-h-[100px]"
+                  />
+                </div>
 
-                      <FormField
-                        control={form.control}
-                        name="region"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Region</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select region" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {CAMEROON_REGIONS.map((region) => (
-                                  <SelectItem key={region.id} value={region.name}>
-                                    {region.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    placeholder="Enter your city"
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={updateProfileMutation.isPending}
+                >
+                  {updateProfileMutation.isPending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Updating...
                     </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Account Info */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Account Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Account Type
-                        </label>
-                        <p className="mt-1 text-sm text-gray-900 dark:text-white capitalize">
-                          {userProfile.userType}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Subscription Status
-                        </label>
-                        <p className="mt-1 text-sm capitalize">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            userProfile.subscriptionStatus === 'active' || userProfile.subscriptionStatus === 'admin'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          }`}>
-                            {userProfile.subscriptionStatus || 'inactive'}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="flex justify-end pt-6">
-                    <Button 
-                      type="submit" 
-                      disabled={updateProfileMutation.isPending}
-                      className="flex items-center gap-2"
-                    >
-                      {updateProfileMutation.isPending ? (
-                        <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      {updateProfileMutation.isPending ? "Updating..." : "Save Changes"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+                  ) : (
+                    "Update Profile"
+                  )}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
