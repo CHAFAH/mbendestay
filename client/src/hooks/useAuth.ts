@@ -40,6 +40,8 @@ export function useAuth() {
       return null;
     },
     retry: false,
+    staleTime: 0, // Always refetch when needed
+    gcTime: 0, // Don't cache for long
   });
 
   return {

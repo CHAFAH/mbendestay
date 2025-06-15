@@ -64,16 +64,29 @@ export default function LandlordDashboard() {
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        title: "Authentication Required",
+        description: "Please log in to access the dashboard.",
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/login";
       }, 500);
       return;
     }
-  }, [isAuthenticated, authLoading, toast]);
+    
+    // Check if user is landlord or admin
+    if (!authLoading && user && user.userType !== "landlord" && !user.isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "This dashboard is only for landlords.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, authLoading, user, toast]);
 
   // Fetch data
   const { data: properties = [], isLoading: propertiesLoading } = useQuery({
