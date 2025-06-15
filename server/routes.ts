@@ -3,12 +3,17 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { authenticateToken, requireSubscription, hashPassword, comparePassword, generateJWT, type AuthenticatedRequest } from "./auth";
+import crypto from "crypto";
 import { 
   insertPropertySchema,
   updatePropertySchema,
   insertInquirySchema,
   insertReviewSchema,
-  searchPropertiesSchema 
+  searchPropertiesSchema,
+  signupSchema,
+  loginSchema,
+  subscriptionSchema
 } from "@shared/schema";
 import { z } from "zod";
 
