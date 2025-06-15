@@ -684,8 +684,8 @@ export default function LandlordDashboard() {
                       </Badge>
                       <span className="text-lg font-semibold text-primary">
                         ₣{user?.subscriptionType === 'yearly' 
-                          ? SUBSCRIPTION_PLANS.yearly.price.toLocaleString()
-                          : SUBSCRIPTION_PLANS.monthly.price.toLocaleString()
+                          ? SUBSCRIPTION_PLANS.landlord_yearly.price.toLocaleString()
+                          : SUBSCRIPTION_PLANS.landlord_monthly.price.toLocaleString()
                         } / {user?.subscriptionType === 'yearly' ? 'year' : 'month'}
                       </span>
                     </div>
@@ -717,8 +717,8 @@ export default function LandlordDashboard() {
                         </li>
                       ) : (
                         (user?.subscriptionType === 'yearly' 
-                          ? SUBSCRIPTION_PLANS.yearly.features 
-                          : SUBSCRIPTION_PLANS.monthly.features
+                          ? SUBSCRIPTION_PLANS.landlord_yearly.features.en 
+                          : SUBSCRIPTION_PLANS.landlord_monthly.features.en
                         ).map((feature, index) => (
                           <li key={index} className="flex items-center space-x-2">
                             <Check className="w-3 h-3 text-green-600" />

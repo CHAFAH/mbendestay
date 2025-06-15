@@ -15,7 +15,8 @@ import {
   Upload, 
   CreditCard,
   Building,
-  Check
+  Check,
+  Search
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { SUBSCRIPTION_PLANS } from "@/lib/constants";
@@ -127,6 +128,90 @@ export default function Landing() {
           </p>
 
           <SearchForm onSearch={handleSearch} className="max-w-4xl mx-auto" />
+        </div>
+      </section>
+
+      {/* Business Model Section */}
+      <section className="py-16 bg-neutral-50">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
+              How MbendeStay Works
+            </h2>
+            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+              Simple, transparent pricing for both renters and property owners
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* For Renters */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200">
+              <div className="text-center mb-6">
+                <Search className="w-16 h-16 text-green-600 mx-auto mb-4" />
+                <h3 className="font-bold text-2xl text-neutral-800 mb-2">Looking for Property</h3>
+                <p className="text-neutral-600">Search and rent properties across Cameroon</p>
+              </div>
+              <div className="text-center mb-6">
+                <div className="text-4xl font-bold text-green-600 mb-2">FREE</div>
+                <span className="text-lg text-neutral-600">Always free to browse</span>
+              </div>
+              <ul className="space-y-3 text-neutral-700 mb-6">
+                {SUBSCRIPTION_PLANS.renter_free.features[language].map((feature, index) => (
+                  <li key={index} className="flex items-center">
+                    <Check className="w-4 h-4 text-green-600 mr-3 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="text-center">
+                <Link href="/browse">
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold">
+                    Start Browsing
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* For Landlords */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-neutral-200">
+              <div className="text-center mb-6">
+                <Building className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h3 className="font-bold text-2xl text-neutral-800 mb-2">List Properties</h3>
+                <p className="text-neutral-600">Rent out your properties to tenants</p>
+              </div>
+              <div className="text-center mb-6">
+                <div className="text-4xl font-bold text-primary mb-2">
+                  {SUBSCRIPTION_PLANS.landlord_monthly.price.toLocaleString()} FCFA
+                </div>
+                <span className="text-lg text-neutral-600">to list properties</span>
+              </div>
+              <ul className="space-y-3 text-neutral-700 mb-6">
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Monthly: Properties listed for 2 months</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Yearly: Properties listed for 12 months</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Photo & video uploads</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                  <span>Direct tenant messaging</span>
+                </li>
+              </ul>
+              <div className="text-center">
+                <Link href="/register-landlord">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold">
+                    List Your Property
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -262,15 +347,15 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {/* Monthly Subscription */}
             <div className="bg-white/10 rounded-2xl p-6 text-left">
-              <h4 className="font-semibold text-xl mb-3 text-center">Monthly Subscription</h4>
+              <h4 className="font-semibold text-xl mb-3 text-center">Monthly Plan</h4>
               <div className="text-center mb-4">
                 <div className="text-4xl font-bold text-accent mb-2">
-                  {SUBSCRIPTION_PLANS.monthly.price.toLocaleString()} XCFA
+                  {SUBSCRIPTION_PLANS.landlord_monthly.price.toLocaleString()} FCFA
                 </div>
                 <span className="text-lg text-white/80">per month</span>
               </div>
               <ul className="space-y-3 text-white/90">
-                {SUBSCRIPTION_PLANS.monthly.features[language].map((feature, index) => (
+                {SUBSCRIPTION_PLANS.landlord_monthly.features[language].map((feature, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
                     <span>{feature}</span>
@@ -290,18 +375,18 @@ export default function Landing() {
             <div className="bg-white/20 rounded-2xl p-6 text-left border-2 border-accent relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-accent text-primary text-sm px-4 py-1 rounded-full font-semibold">
-                  {SUBSCRIPTION_PLANS.yearly.savings[language]}
+                  {SUBSCRIPTION_PLANS.landlord_yearly.savings[language]}
                 </span>
               </div>
-              <h4 className="font-semibold text-xl mb-3 text-center">Yearly Subscription</h4>
+              <h4 className="font-semibold text-xl mb-3 text-center">Yearly Plan</h4>
               <div className="text-center mb-4">
                 <div className="text-4xl font-bold text-accent mb-2">
-                  {SUBSCRIPTION_PLANS.yearly.price.toLocaleString()} XCFA
+                  {SUBSCRIPTION_PLANS.landlord_yearly.price.toLocaleString()} FCFA
                 </div>
                 <span className="text-lg text-white/80">per year</span>
               </div>
               <ul className="space-y-3 text-white/90">
-                {SUBSCRIPTION_PLANS.yearly.features[language].map((feature, index) => (
+                {SUBSCRIPTION_PLANS.landlord_yearly.features[language].map((feature, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="w-4 h-4 text-accent mr-3 flex-shrink-0" />
                     <span>{feature}</span>

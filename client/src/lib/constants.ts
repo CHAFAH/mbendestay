@@ -46,54 +46,77 @@ export const AMENITIES = [
 ];
 
 export const SUBSCRIPTION_PLANS = {
-  monthly: {
+  // For landlords to list properties
+  landlord_monthly: {
     price: 10000,
     duration: "month",
+    type: "landlord",
+    listingDuration: 2, // months
     features: {
       en: [
-        "Up to 5 property listings",
-        "Photo uploads",
-        "Guest messaging system",
-        "Chat support",
-        "Basic analytics",
+        "List properties for 2 months",
+        "Up to 10 property listings",
+        "Photo and video uploads",
+        "Tenant messaging system",
+        "Basic property analytics",
       ],
       fr: [
-        "Jusqu'à 5 annonces de propriétés",
-        "Téléchargement de photos",
-        "Système de messagerie pour invités",
-        "Support par chat",
-        "Analyses de base",
+        "Lister les propriétés pendant 2 mois",
+        "Jusqu'à 10 annonces de propriétés",
+        "Téléchargement de photos et vidéos",
+        "Système de messagerie locataires",
+        "Analyses de base des propriétés",
       ]
     },
   },
-  yearly: {
+  landlord_yearly: {
     price: 80000,
     duration: "year",
+    type: "landlord",
+    listingDuration: 12, // months
     features: {
       en: [
+        "List properties for 12 months",
         "Unlimited property listings",
-        "Photo & video uploads",
-        "Priority search placement",
-        "Advanced analytics dashboard",
-        "Contract templates",
-        "Guest messaging system",
-        "Chat support",
-        "Priority support",
+        "Premium photo and video uploads",
+        "Priority tenant messaging",
+        "Advanced property analytics",
+        "Featured listings boost",
       ],
       fr: [
+        "Lister les propriétés pendant 12 mois",
         "Annonces de propriétés illimitées",
-        "Téléchargement de photos et vidéos",
-        "Placement prioritaire dans les recherches",
-        "Tableau de bord d'analyses avancées",
-        "Modèles de contrats",
-        "Système de messagerie pour invités",
-        "Support par chat",
-        "Support prioritaire",
+        "Téléchargements premium photos/vidéos",
+        "Messagerie locataires prioritaire",
+        "Analyses avancées des propriétés",
+        "Boost des annonces en vedette",
       ]
     },
     savings: {
       en: "Save 33%",
       fr: "Économisez 33%"
+    },
+  },
+  // For renters to search properties (free)
+  renter_free: {
+    price: 0,
+    duration: "unlimited",
+    type: "renter",
+    features: {
+      en: [
+        "Browse all properties",
+        "Contact landlords directly",
+        "Save favorite properties",
+        "Basic search filters",
+        "Property comparison",
+      ],
+      fr: [
+        "Parcourir toutes les propriétés",
+        "Contacter directement les propriétaires",
+        "Sauvegarder les propriétés favorites",
+        "Filtres de recherche de base",
+        "Comparaison de propriétés",
+      ]
     },
   },
 };
