@@ -42,6 +42,9 @@ export default function Login() {
       // Invalidate auth queries to force refetch
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       
+      // Add a small delay to ensure query invalidation completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const user = data.user;
       
       // Admin users bypass subscription
