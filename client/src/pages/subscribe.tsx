@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
@@ -13,12 +14,21 @@ import { apiRequest } from "@/lib/queryClient";
 import { subscriptionSchema } from "@shared/schema";
 import type { z } from "zod";
 import Navigation from "@/components/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
 export default function Subscribe() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user, isLoading } = useAuth();
+
+  // Redirect admin users away from subscription page
+  useEffect(() => {
+    if (!isLoading && user && (user as any).isAdmin) {
+      setLocation("/");
+    }
+  }, [user, isLoading, setLocation]);
 
   const form = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
@@ -53,8 +63,8 @@ export default function Subscribe() {
     subscriptionMutation.mutate(data);
   };
 
-  const monthlyPrice = 2500;
-  const yearlyPrice = 25000;
+  const monthlyPrice = 10000;
+  const yearlyPrice = 80000;
   const yearlySavings = (monthlyPrice * 12) - yearlyPrice;
 
   return (

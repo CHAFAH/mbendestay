@@ -269,7 +269,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search properties
   app.get('/api/properties', async (req, res) => {
     try {
-      const filters = searchPropertiesSchema.parse(req.query);
+      // Handle amenities parameter conversion from string to array
+      const query = { ...req.query };
+      if (query.amenities && typeof query.amenities === 'string') {
+        try {
+          query.amenities = JSON.parse(query.amenities);
+        } catch {
+          query.amenities = [query.amenities];
+        }
+      }
+      
+      const filters = searchPropertiesSchema.parse(query);
       const result = await storage.getProperties(filters);
       res.json(result);
     } catch (error) {

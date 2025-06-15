@@ -167,24 +167,7 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="mt-4 space-y-3">
-              <div className="p-3 bg-blue-50 rounded-md">
-                <p className="text-sm text-blue-700 text-center">
-                  <strong>Admin Account:</strong><br />
-                  Email: sani.ray.red@gmail.com<br />
-                  Use "Continue with Replit" button above
-                </p>
-              </div>
-              
-              <div className="p-3 bg-green-50 rounded-md">
-                <p className="text-sm text-green-700 text-center">
-                  <strong>Admin Account (Custom Login):</strong><br />
-                  Email: sani.ray.red@gmail.com<br />
-                  Password: admin123<br />
-                  (Full access, bypasses subscription)
-                </p>
-              </div>
-            </div>
+
           </CardContent>
         </Card>
       </div>
