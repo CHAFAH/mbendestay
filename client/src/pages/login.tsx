@@ -33,9 +33,13 @@ export default function Login() {
     mutationFn: async (data: LoginFormData) => {
       return apiRequest("POST", "/api/auth/login", data);
     },
-    onSuccess: (response) => {
-      const user = response.user;
-      if (user.subscriptionStatus === "active") {
+    onSuccess: async (response) => {
+      const data = await response.json();
+      if (data.token) {
+        localStorage.setItem("auth_token", data.token);
+      }
+      
+      if (data.user?.subscriptionStatus === "active") {
         toast({
           title: "Welcome back!",
           description: "Successfully signed in to your account.",

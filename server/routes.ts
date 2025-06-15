@@ -21,7 +21,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Auth routes
+  // Local Auth routes
+  app.post('/api/auth/signup', async (req, res) => {
+    try {
+      const validatedData = signupSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists with this email" });
+      }
+
+      // Hash password and create user
+      const hashedPassword = await hashPassword(validatedData.password);
+      const userId = crypto.randomUUID();
+      
+      const user = await storage.createUser({
+        id: userId,
+        email: validatedData.email,
+        password: hashedPassword,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+      });
+
+      // Generate JWT token
+      const token = generateJWT({
+        id: user.id,
+        email: user.email!,
+        subscriptionStatus: user.subscriptionStatus || "inactive",
+      });
+
+      res.status(201).json({
+        message: "Account created successfully",
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          subscriptionStatus: user.subscriptionStatus,
+        },
+      });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error("Signup error:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(validatedData.email);
+      if (!user || !user.password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Verify password
+      const isValidPassword = await comparePassword(validatedData.password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Generate JWT token
+      const token = generateJWT({
+        id: user.id,
+        email: user.email!,
+        subscriptionStatus: user.subscriptionStatus || "inactive",
+      });
+
+      res.json({
+        message: "Login successful",
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          subscriptionStatus: user.subscriptionStatus,
+        },
+      });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Failed to login" });
+    }
+  });
+
+  app.get('/api/auth/me', authenticateToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        subscriptionStatus: user.subscriptionStatus,
+        subscriptionType: user.subscriptionType,
+        subscriptionExpiresAt: user.subscriptionExpiresAt,
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Subscription routes
+  app.post('/api/subscription/create', authenticateToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      const validatedData = subscriptionSchema.parse(req.body);
+      const userId = req.user!.id;
+      
+      // Calculate subscription expiration
+      const now = new Date();
+      const expiresAt = new Date(now);
+      if (validatedData.type === "monthly") {
+        expiresAt.setMonth(expiresAt.getMonth() + 1);
+      } else {
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+      }
+
+      // Update user subscription
+      const updatedUser = await storage.updateUser(userId, {
+        subscriptionStatus: "active",
+        subscriptionType: validatedData.type,
+        subscriptionExpiresAt: expiresAt,
+      });
+
+      res.json({
+        message: "Subscription activated successfully",
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          subscriptionStatus: updatedUser.subscriptionStatus,
+          subscriptionType: updatedUser.subscriptionType,
+          subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
+        },
+      });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error("Subscription error:", error);
+      res.status(500).json({ message: "Failed to activate subscription" });
+    }
+  });
+
+  // Auth routes (Replit Auth compatibility)
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

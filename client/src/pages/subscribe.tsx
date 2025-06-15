@@ -11,7 +11,6 @@ import { Check, Crown, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { subscriptionSchema } from "@shared/schema";
-import { useLanguage } from "@/hooks/useLanguage";
 import type { z } from "zod";
 import Navigation from "@/components/navigation";
 
@@ -20,7 +19,6 @@ type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 export default function Subscribe() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   const form = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
