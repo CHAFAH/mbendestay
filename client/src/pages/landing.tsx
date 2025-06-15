@@ -134,10 +134,10 @@ export default function Landing() {
         <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
           <div className="text-center mb-12">
             <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
-              Featured Properties
+              {t('featuredProperties')}
             </h2>
             <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-              Discover handpicked accommodations across Cameroon's most beautiful destinations
+              {t('featuredPropertiesDesc')}
             </p>
           </div>
 
@@ -150,7 +150,7 @@ export default function Landing() {
           ) : (
             <div className="text-center py-12">
               <p className="text-neutral-600 text-lg">
-                No properties available yet. Be the first to list your property!
+                {t('noPropertiesYet')}
               </p>
             </div>
           )}
@@ -158,7 +158,7 @@ export default function Landing() {
           <div className="text-center mt-12">
             <Link href="/browse">
               <Button className="bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-8">
-                View All Properties
+                {t('viewAllProperties')}
               </Button>
             </Link>
           </div>

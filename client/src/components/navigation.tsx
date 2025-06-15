@@ -4,18 +4,21 @@ import { useAuth } from "@/hooks/useAuth";
 import { Home, Search, Building, User, Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import SimpleLanguageSwitcher from "@/components/simple-language-switcher";
+import SimpleLanguageSwitcher, { useLanguage } from "@/components/simple-language-switcher";
+import { useTranslation } from "@/lib/constants";
 
 export default function Navigation() {
   const { isAuthenticated, user } = useAuth();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { language } = useLanguage();
+  const { t } = useTranslation(language);
 
   const navItems = [
-    { path: "/", label: "Home", icon: Home, public: true },
-    { path: "/browse", label: "Browse Properties", icon: Search, public: true },
-    { path: "/messages", label: "Messages", icon: MessageCircle, public: false },
-    { path: "/dashboard", label: "Dashboard", icon: Building, public: false },
+    { path: "/", label: t('home'), icon: Home, public: true },
+    { path: "/browse", label: t('browse'), icon: Search, public: true },
+    { path: "/messages", label: t('messages'), icon: MessageCircle, public: false },
+    { path: "/dashboard", label: t('dashboard'), icon: Building, public: false },
   ];
 
   return (
