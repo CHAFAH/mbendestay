@@ -131,6 +131,100 @@ export default function Landing() {
         </div>
       </section>
 
+
+
+      {/* Featured Properties */}
+      <section className="py-16 bg-white">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
+              {t('featuredProperties')}
+            </h2>
+            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+              {t('featuredPropertiesDesc')}
+            </p>
+          </div>
+
+          {(featuredProperties as any)?.properties && (featuredProperties as any).properties.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
+              {(featuredProperties as any).properties.slice(0, 10).map((property: any) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-neutral-600 text-lg">
+                {t('noPropertiesYet')}
+              </p>
+            </div>
+          )}
+
+          <div className="text-center mt-12">
+            <Link href="/browse">
+              <Button className="bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-8">
+                {t('viewAllProperties')}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Regions Section */}
+      <section className="py-16 bg-neutral-50">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
+              {t('exploreRegions')}
+            </h2>
+            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+              {t('exploreRegionsSubtitle')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {REGIONS_DATA.slice(0, 10).map((region) => (
+              <div key={region.id} className="group cursor-pointer bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                <div className="relative overflow-hidden">
+                  <img 
+                    src={region.imageUrl} 
+                    alt={`${region.name} region landscape`} 
+                    className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute bottom-2 left-2">
+                    <h3 className="font-bold text-base text-white">
+                      {region.name}
+                    </h3>
+                    <p className="text-xs text-white/90">{region.capital}</p>
+                  </div>
+                </div>
+                
+                <div className="p-3">
+                  <div className="flex justify-between text-xs text-neutral-600 mb-3">
+                    <span>{region.temperature}</span>
+                    <span>{region.population}</span>
+                  </div>
+                  
+                  <Link href={`/region/${region.slug}`}>
+                    <Button variant="outline" size="sm" className="w-full text-xs group-hover:bg-primary group-hover:text-white transition-colors">
+                      Explore
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Link href="/browse">
+              <Button size="lg" className="px-8">
+                {t('viewAllRegionsProperties')}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Business Model Section */}
       <section className="py-16 bg-neutral-50">
         <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
@@ -231,100 +325,6 @@ export default function Landing() {
                 </Link>
               </div>
             </div>
-
-
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Properties */}
-      <section className="py-16 bg-white">
-        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="text-center mb-12">
-            <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
-              {t('featuredProperties')}
-            </h2>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-              {t('featuredPropertiesDesc')}
-            </p>
-          </div>
-
-          {(featuredProperties as any)?.properties && (featuredProperties as any).properties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
-              {(featuredProperties as any).properties.slice(0, 10).map((property: any) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-neutral-600 text-lg">
-                {t('noPropertiesYet')}
-              </p>
-            </div>
-          )}
-
-          <div className="text-center mt-12">
-            <Link href="/browse">
-              <Button className="bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-8">
-                {t('viewAllProperties')}
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Regions Section */}
-      <section className="py-16 bg-neutral-50">
-        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="text-center mb-12">
-            <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
-              {t('exploreRegions')}
-            </h2>
-            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
-              {t('exploreRegionsSubtitle')}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {REGIONS_DATA.slice(0, 10).map((region) => (
-              <div key={region.id} className="group cursor-pointer bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                <div className="relative overflow-hidden">
-                  <img 
-                    src={region.imageUrl} 
-                    alt={`${region.name} region landscape`} 
-                    className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2">
-                    <h3 className="font-bold text-base text-white">
-                      {region.name}
-                    </h3>
-                    <p className="text-xs text-white/90">{region.capital}</p>
-                  </div>
-                </div>
-                
-                <div className="p-3">
-                  <div className="flex justify-between text-xs text-neutral-600 mb-3">
-                    <span>{region.temperature}</span>
-                    <span>{region.population}</span>
-                  </div>
-                  
-                  <Link href={`/region/${region.slug}`}>
-                    <Button variant="outline" size="sm" className="w-full text-xs group-hover:bg-primary group-hover:text-white transition-colors">
-                      Explore
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="text-center mt-12">
-            <Link href="/browse">
-              <Button size="lg" className="px-8">
-                {t('viewAllRegionsProperties')}
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
