@@ -72,10 +72,10 @@ export default function Navigation() {
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center overflow-hidden border-2 border-primary/20 hover:border-primary/40 transition-colors">
-                  {user?.profileImageUrl ? (
+                  {(user as any)?.profileImageUrl ? (
                     <img 
-                      src={user.profileImageUrl} 
-                      alt={`${user.firstName || 'User'} Profile`} 
+                      src={(user as any).profileImageUrl} 
+                      alt={`${(user as any).firstName || 'User'} Profile`} 
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
@@ -84,17 +84,17 @@ export default function Navigation() {
                 </div>
                 <div className="hidden md:flex flex-col">
                   <span className="text-sm font-medium text-neutral-900">
-                    {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                    {(user as any)?.firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : (user as any)?.email}
                   </span>
-                  {user?.isAdmin && (
-                    <span className="text-xs text-primary font-medium">Admin</span>
+                  {(user as any)?.isAdmin && (
+                    <span className="text-xs text-primary font-medium">{t('admin')}</span>
                   )}
                 </div>
                 <a 
                   href="/api/logout"
                   className="text-sm text-neutral-600 hover:text-primary transition-colors font-medium"
                 >
-                  Logout
+                  {t('logout')}
                 </a>
               </div>
             ) : (
@@ -105,7 +105,7 @@ export default function Navigation() {
                 <div className="w-10 h-10 bg-gradient-to-r from-primary to-primary/80 rounded-full flex items-center justify-center">
                   <User className="w-5 h-5 text-white" />
                 </div>
-                <span className="hidden md:inline text-sm font-medium">Sign in with Replit</span>
+                <span className="hidden md:inline text-sm font-medium">{t('signIn')}</span>
               </a>
             )}
             

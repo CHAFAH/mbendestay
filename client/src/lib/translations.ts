@@ -1,10 +1,10 @@
 export const translations = {
   // Landing page hero section
-  findYourPerfectStay: {
+  heroTitle: {
     en: "Find Your Perfect Stay in Cameroon",
     fr: "Trouvez Votre Séjour Parfait au Cameroun"
   },
-  discoverUnique: {
+  heroSubtitle: {
     en: "Discover unique accommodations across all 10 regions and 65 divisions of Cameroon",
     fr: "Découvrez des hébergements uniques dans les 10 régions et 65 divisions du Cameroun"
   },
@@ -59,6 +59,10 @@ export const translations = {
   profile: {
     en: "Profile",
     fr: "Profil"
+  },
+  admin: {
+    en: "Admin",
+    fr: "Admin"
   },
   
   // Search form
@@ -265,6 +269,46 @@ export const translations = {
   exploreProperties: {
     en: "Explore Properties",
     fr: "Explorer les Propriétés"
+  },
+  
+  // Landing page sections
+  findYourPerfectStayTitle: {
+    en: "Find Your Perfect Stay in Cameroon",
+    fr: "Trouvez Votre Séjour Parfait au Cameroun"
+  },
+  discoverUniqueDesc: {
+    en: "Discover unique accommodations across all 10 regions and 65 divisions of Cameroon",
+    fr: "Découvrez des hébergements uniques dans les 10 régions et 65 divisions du Cameroun"
+  },
+  
+  // Navigation buttons
+  signIn: {
+    en: "Sign In",
+    fr: "Se Connecter"
+  },
+  signUp: {
+    en: "Sign Up",
+    fr: "S'inscrire"
+  },
+  
+  // Property card elements
+  viewProperty: {
+    en: "View Property",
+    fr: "Voir la Propriété"
+  },
+  noPhotos: {
+    en: "No photos available",
+    fr: "Aucune photo disponible"
+  },
+  
+  // Form placeholders and labels
+  selectRegionFirst: {
+    en: "Select Region First",
+    fr: "Sélectionnez d'abord une Région"
+  },
+  anyType: {
+    en: "Any Type",
+    fr: "Tout Type"
   }
 };
 

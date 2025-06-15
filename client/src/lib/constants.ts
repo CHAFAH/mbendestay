@@ -203,64 +203,6 @@ export function useTranslation(lang: 'en' | 'fr' = 'en') {
       learnMore: {
         en: "Learn More",
         fr: "En Savoir Plus"
-      },
-      noPropertiesYet: {
-        en: "No properties available yet. Be the first to list your property!",
-        fr: "Aucune propriété disponible pour le moment. Soyez le premier à lister votre propriété!"
-      },
-      viewAllProperties: {
-        en: "View All Properties",
-        fr: "Voir Toutes les Propriétés"
-      },
-      featuredProperties: {
-        en: "Featured Properties",
-        fr: "Propriétés en Vedette"
-      },
-      featuredPropertiesDesc: {
-        en: "Discover handpicked accommodations across Cameroon's most beautiful destinations",
-        fr: "Découvrez des hébergements sélectionnés dans les plus belles destinations du Cameroun"
-      },
-      // Navigation
-      home: {
-        en: "Home",
-        fr: "Accueil"
-      },
-      browse: {
-        en: "Browse",
-        fr: "Parcourir"
-      },
-      messages: {
-        en: "Messages",
-        fr: "Messages"
-      },
-      dashboard: {
-        en: "Dashboard",
-        fr: "Tableau de bord"
-      },
-      // Property types
-      apartment: {
-        en: "Apartment",
-        fr: "Appartement"
-      },
-      guestHouse: {
-        en: "Guest House",
-        fr: "Maison d'Hôtes"
-      },
-      room: {
-        en: "Room",
-        fr: "Chambre"
-      },
-      studio: {
-        en: "Studio",
-        fr: "Studio"
-      },
-      officeSpace: {
-        en: "Office Space",
-        fr: "Espace de Bureau"
-      },
-      commercial: {
-        en: "Commercial",
-        fr: "Commercial"
       }
     };
 
