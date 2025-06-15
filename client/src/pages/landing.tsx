@@ -177,66 +177,33 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {REGIONS_DATA.slice(0, 8).map((region) => (
-              <div key={region.id} className="group cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {REGIONS_DATA.slice(0, 10).map((region) => (
+              <div key={region.id} className="group cursor-pointer bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                 <div className="relative overflow-hidden">
                   <img 
                     src={region.imageUrl} 
                     alt={`${region.name} region landscape`} 
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-3 left-3">
-                    <h3 className="font-bold text-xl text-white mb-1">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute bottom-2 left-2">
+                    <h3 className="font-bold text-base text-white">
                       {region.name}
                     </h3>
-                    <p className="text-sm text-white/90">{region.capital}</p>
+                    <p className="text-xs text-white/90">{region.capital}</p>
                   </div>
                 </div>
                 
-                <div className="p-5">
-                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-                    <div>
-                      <span className="text-neutral-500">{t('temperature')}</span>
-                      <p className="font-medium text-neutral-800">{region.temperature}</p>
-                    </div>
-                    <div>
-                      <span className="text-neutral-500">{t('population')}</span>
-                      <p className="font-medium text-neutral-800">{region.population}</p>
-                    </div>
+                <div className="p-3">
+                  <div className="flex justify-between text-xs text-neutral-600 mb-3">
+                    <span>{region.temperature}</span>
+                    <span>{region.population}</span>
                   </div>
                   
-                  <p className="text-sm text-neutral-600 mb-4 line-clamp-3">
-                    {region.description[language]}
-                  </p>
-                  
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-sm text-neutral-800 mb-2">{t('popularLocations')}</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {region.popularLocations.slice(0, 3).map((location, index) => (
-                        <span key={index} className="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded-full">
-                          {location}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-sm text-neutral-800 mb-2">{t('keyAttractions')}</h4>
-                    <ul className="text-xs text-neutral-600 space-y-1">
-                      {region.attractions.slice(0, 2).map((attraction, index) => (
-                        <li key={index} className="flex items-center">
-                          <span className="w-1 h-1 bg-primary rounded-full mr-2"></span>
-                          {attraction}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <Link href={`/browse?region=${region.slug}`}>
-                    <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-white transition-colors">
-                      {t('exploreProperties')}
+                  <Link href={`/region/${region.slug}`}>
+                    <Button variant="outline" size="sm" className="w-full text-xs group-hover:bg-primary group-hover:text-white transition-colors">
+                      Explore
                     </Button>
                   </Link>
                 </div>
