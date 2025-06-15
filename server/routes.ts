@@ -23,7 +23,8 @@ import {
   searchPropertiesSchema,
   subscriptionSchema,
   signupSchema,
-  loginSchema
+  loginSchema,
+  updateUserSchema
 } from "@shared/schema";
 import { z } from "zod";
 

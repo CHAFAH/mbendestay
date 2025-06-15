@@ -6,6 +6,13 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import SimpleLanguageSwitcher, { useLanguage } from "@/components/simple-language-switcher";
 import { useTranslation } from "@/lib/translations";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Navigation() {
   const { isAuthenticated, user } = useAuth();
@@ -104,25 +111,38 @@ export default function Navigation() {
                     <User className="w-6 h-6 text-neutral-600" />
                   )}
                 </div>
-                <div className="hidden md:flex flex-col">
-                  <span className="text-sm font-medium text-neutral-900">
-                    {(user as any)?.firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : (user as any)?.email}
-                  </span>
-                  {(user as any)?.isAdmin && (
-                    <span className="text-xs text-primary font-medium">{t('admin')}</span>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    // Clear JWT token for custom auth
-                    localStorage.removeItem("auth_token");
-                    // Redirect to Replit logout for OAuth users
-                    window.location.href = "/api/logout";
-                  }}
-                  className="text-sm text-neutral-600 hover:text-primary transition-colors font-medium"
-                >
-                  {t('logout')}
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="hidden md:flex flex-col cursor-pointer hover:bg-neutral-50 p-2 rounded-lg transition-colors">
+                      <span className="text-sm font-medium text-neutral-900">
+                        {(user as any)?.firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : (user as any)?.email}
+                      </span>
+                      {(user as any)?.isAdmin && (
+                        <span className="text-xs text-primary font-medium">{t('admin')}</span>
+                      )}
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Profile Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        // Clear JWT token for custom auth
+                        localStorage.removeItem("auth_token");
+                        // Redirect to Replit logout for OAuth users
+                        window.location.href = "/api/logout";
+                      }}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      {t('logout')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <div className="flex items-center space-x-3">
