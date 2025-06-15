@@ -35,9 +35,10 @@ export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, data: Partial<User>): Promise<User>;
-  createUser(user: { id: string; email: string; password: string; firstName: string; lastName: string; }): Promise<User>;
+  createUser(user: { id: string; email: string; password: string; firstName: string; lastName: string; username: string; userType: string; phoneNumber?: string; }): Promise<User>;
 
   // Region/Division operations
   getRegions(): Promise<Region[]>;
@@ -84,10 +85,18 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(userData: { id: string; email: string; password: string; firstName: string; lastName: string; }): Promise<User> {
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(userData: { id: string; email: string; password: string; firstName: string; lastName: string; username: string; userType: string; phoneNumber?: string; }): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        userType: userData.userType as "renter" | "landlord",
+      })
       .returning();
     return user;
   }

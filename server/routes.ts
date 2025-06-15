@@ -36,6 +36,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User already exists with this email" });
       }
 
+      // Check if username already exists
+      const existingUsername = await storage.getUserByUsername(validatedData.username);
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username is already taken" });
+      }
+
       // Hash password and create user
       const hashedPassword = await hashPassword(validatedData.password);
       const newUser = await storage.createUser({
@@ -43,7 +49,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: validatedData.email,
         password: hashedPassword,
         firstName: validatedData.firstName,
-        lastName: validatedData.lastName
+        lastName: validatedData.lastName,
+        username: validatedData.username,
+        userType: validatedData.userType,
+        phoneNumber: validatedData.phoneNumber
       });
 
       res.status(201).json({ 
@@ -52,7 +61,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: newUser.id,
           email: newUser.email,
           firstName: newUser.firstName,
-          lastName: newUser.lastName
+          lastName: newUser.lastName,
+          username: newUser.username,
+          userType: newUser.userType
         }
       });
     } catch (error: any) {
@@ -94,6 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          username: user.username,
+          userType: user.userType,
           subscriptionStatus: isAdmin ? 'admin' : (user.subscriptionStatus || 'none'),
           isAdmin
         }
