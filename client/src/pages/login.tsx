@@ -147,6 +147,33 @@ export default function Login() {
                 </Link>
               </p>
             </div>
+
+            <div className="mt-4 text-center">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-neutral-500">Or</span>
+                </div>
+              </div>
+              <div className="mt-4">
+                <a
+                  href="/api/login"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-neutral-300 rounded-md shadow-sm bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50"
+                >
+                  Continue with Replit
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 rounded-md">
+              <p className="text-sm text-blue-700 text-center">
+                <strong>Admin Account:</strong><br />
+                Email: sani.ray.red@gmail.com<br />
+                Use "Continue with Replit" button above
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

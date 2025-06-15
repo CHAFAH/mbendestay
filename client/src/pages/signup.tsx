@@ -1,231 +1,233 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Eye, EyeOff, Check, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { Link, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import { signupSchema } from "@shared/schema";
-import type { z } from "zod";
-import Navigation from "@/components/navigation";
+import { useLanguage } from "@/components/simple-language-switcher";
+import { useTranslation } from "@/lib/translations";
+import { Eye, EyeOff } from "lucide-react";
 
-type SignupFormData = z.infer<typeof signupSchema>;
+const signupSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+type SignupForm = z.infer<typeof signupSchema>;
 
 export default function Signup() {
   const [, setLocation] = useLocation();
-  const [showPassword, setShowPassword] = useState(false);
+  const { language } = useLanguage();
+  const { t } = useTranslation(language);
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const form = useForm<SignupFormData>({
+  const form = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      email: "",
-      password: "",
       firstName: "",
       lastName: "",
-    },
+      email: "",
+      password: "",
+      confirmPassword: ""
+    }
   });
 
-  const password = form.watch("password");
-
-  // Password validation criteria
-  const passwordCriteria = [
-    {
-      label: "At least 8 characters",
-      met: password.length >= 8,
-    },
-    {
-      label: "One uppercase letter",
-      met: /[A-Z]/.test(password),
-    },
-    {
-      label: "One lowercase letter", 
-      met: /[a-z]/.test(password),
-    },
-    {
-      label: "One number",
-      met: /[0-9]/.test(password),
-    },
-    {
-      label: "One special character",
-      met: /[^A-Za-z0-9]/.test(password),
-    },
-  ];
-
-  const passwordStrength = passwordCriteria.filter(criteria => criteria.met).length;
-  const strengthPercentage = (passwordStrength / passwordCriteria.length) * 100;
-
   const signupMutation = useMutation({
-    mutationFn: async (data: SignupFormData) => {
-      return apiRequest("POST", "/api/auth/signup", data);
+    mutationFn: async (data: SignupForm) => {
+      const response = await apiRequest("POST", "/api/auth/signup", {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password
+      });
+      return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Account created successfully",
-        description: "Please choose a subscription plan to continue.",
+        title: t('success'),
+        description: "Account created successfully! Please sign in.",
       });
-      setLocation("/subscribe");
+      setLocation("/login");
     },
     onError: (error: Error) => {
       toast({
-        title: "Signup failed",
+        title: t('error'),
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const onSubmit = (data: SignupFormData) => {
+  const onSubmit = (data: SignupForm) => {
     signupMutation.mutate(data);
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <Navigation />
-      
-      <div className="max-w-md mx-auto px-4 py-8">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-            <p className="text-neutral-600">Join MbendeStay to access exclusive property details</p>
-          </CardHeader>
-          
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="john@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            {t('createAccount')}
+          </CardTitle>
+          <CardDescription className="text-center">
+            {t('joinMbendeStay')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">{t('firstName')}</Label>
+                <Input
+                  id="firstName"
+                  placeholder={t('firstName')}
+                  {...form.register("firstName")}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Create a strong password"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Password Strength Indicator */}
-                {password && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-neutral-600">Password strength</span>
-                      <span className={`font-medium ${
-                        strengthPercentage >= 80 ? "text-green-600" :
-                        strengthPercentage >= 60 ? "text-yellow-600" :
-                        "text-red-600"
-                      }`}>
-                        {strengthPercentage >= 80 ? "Strong" :
-                         strengthPercentage >= 60 ? "Medium" : "Weak"}
-                      </span>
-                    </div>
-                    <Progress value={strengthPercentage} className="h-2" />
-                    
-                    <div className="space-y-1">
-                      {passwordCriteria.map((criteria, index) => (
-                        <div key={index} className="flex items-center text-sm">
-                          {criteria.met ? (
-                            <Check className="h-4 w-4 text-green-600 mr-2" />
-                          ) : (
-                            <X className="h-4 w-4 text-red-600 mr-2" />
-                          )}
-                          <span className={criteria.met ? "text-green-600" : "text-neutral-600"}>
-                            {criteria.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {form.formState.errors.firstName && (
+                  <p className="text-sm text-red-600">
+                    {form.formState.errors.firstName.message}
+                  </p>
                 )}
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={signupMutation.isPending || strengthPercentage < 100}
-                >
-                  {signupMutation.isPending ? "Creating Account..." : "Create Account"}
-                </Button>
-              </form>
-            </Form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-neutral-600">
-                Already have an account?{" "}
-                <Link href="/login" className="text-blue-600 hover:underline">
-                  Sign in
-                </Link>
-              </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">{t('lastName')}</Label>
+                <Input
+                  id="lastName"
+                  placeholder={t('lastName')}
+                  {...form.register("lastName")}
+                />
+                {form.formState.errors.lastName && (
+                  <p className="text-sm text-red-600">
+                    {form.formState.errors.lastName.message}
+                  </p>
+                )}
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">{t('email')}</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder={t('emailPlaceholder')}
+                {...form.register("email")}
+              />
+              {form.formState.errors.email && (
+                <p className="text-sm text-red-600">
+                  {form.formState.errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">{t('password')}</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder={t('passwordPlaceholder')}
+                  {...form.register("password")}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {form.formState.errors.password && (
+                <p className="text-sm text-red-600">
+                  {form.formState.errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder={t('confirmPasswordPlaceholder')}
+                  {...form.register("confirmPassword")}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {form.formState.errors.confirmPassword && (
+                <p className="text-sm text-red-600">
+                  {form.formState.errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={signupMutation.isPending}
+            >
+              {signupMutation.isPending ? t('loading') : t('createAccount')}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-neutral-600">
+              {t('alreadyHaveAccount')}{" "}
+              <Link href="/login" className="text-primary hover:underline">
+                {t('signIn')}
+              </Link>
+            </p>
+          </div>
+
+          <div className="mt-4 text-center">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-neutral-500">{t('or')}</span>
+              </div>
+            </div>
+            <div className="mt-4">
+              <a
+                href="/api/login"
+                className="w-full inline-flex justify-center py-2 px-4 border border-neutral-300 rounded-md shadow-sm bg-white text-sm font-medium text-neutral-500 hover:bg-neutral-50"
+              >
+                {t('continueWithReplit')}
+              </a>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

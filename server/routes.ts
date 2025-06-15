@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { authenticateToken, hashPassword, comparePassword, generateJWT } from "./auth";
 // Admin account that bypasses subscription requirements
 const ADMIN_EMAIL = "sani.ray.red@gmail.com";
 import { 
@@ -11,7 +12,9 @@ import {
   insertInquirySchema,
   insertReviewSchema,
   searchPropertiesSchema,
-  subscriptionSchema
+  subscriptionSchema,
+  signupSchema,
+  loginSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -19,29 +22,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Replit Auth user endpoint
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Custom authentication routes
+  app.post('/api/auth/signup', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const userEmail = req.user.claims.email;
-      const user = await storage.getUser(userId);
+      const validatedData = signupSchema.parse(req.body);
       
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists with this email" });
+      }
+
+      // Hash password and create user
+      const hashedPassword = await hashPassword(validatedData.password);
+      const newUser = await storage.createUser({
+        id: Date.now().toString(), // Simple ID generation
+        email: validatedData.email,
+        password: hashedPassword,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName
+      });
+
+      res.status(201).json({ 
+        message: "User created successfully",
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName
+        }
+      });
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      res.status(400).json({ message: error.message || "Failed to create user" });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(validatedData.email);
+      if (!user || !user.password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Verify password
+      const isValidPassword = await comparePassword(validatedData.password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
       // Check if this is the admin account
-      const isAdmin = userEmail === ADMIN_EMAIL;
-      
-      // Return user data with admin status
+      const isAdmin = user.email === ADMIN_EMAIL;
+
+      // Generate JWT token
+      const token = generateJWT({
+        id: user.id,
+        email: user.email,
+        subscriptionStatus: isAdmin ? 'admin' : (user.subscriptionStatus || 'none')
+      });
+
       res.json({
-        id: user?.id || userId,
-        email: userEmail,
-        firstName: user?.firstName || req.user.claims.first_name,
-        lastName: user?.lastName || req.user.claims.last_name,
-        profileImageUrl: req.user.claims.profile_image_url,
-        subscriptionStatus: isAdmin ? 'admin' : (user?.subscriptionStatus || 'none'),
-        isAdmin
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          subscriptionStatus: isAdmin ? 'admin' : (user.subscriptionStatus || 'none'),
+          isAdmin
+        }
+      });
+    } catch (error: any) {
+      console.error("Login error:", error);
+      res.status(400).json({ message: error.message || "Failed to login" });
+    }
+  });
+
+  // Combined auth endpoint that works with both Replit OAuth and custom auth
+  app.get('/api/auth/user', async (req: any, res) => {
+    // First try Replit auth
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      try {
+        const userId = req.user.claims.sub;
+        const userEmail = req.user.claims.email;
+        const user = await storage.getUser(userId);
+        
+        // Check if this is the admin account
+        const isAdmin = userEmail === ADMIN_EMAIL;
+        
+        // Return user data with admin status
+        return res.json({
+          id: user?.id || userId,
+          email: userEmail,
+          firstName: user?.firstName || req.user.claims.first_name,
+          lastName: user?.lastName || req.user.claims.last_name,
+          profileImageUrl: req.user.claims.profile_image_url,
+          subscriptionStatus: isAdmin ? 'admin' : (user?.subscriptionStatus || 'none'),
+          isAdmin
+        });
+      } catch (error) {
+        console.error("Error fetching Replit user:", error);
+        return res.status(500).json({ message: "Failed to fetch user" });
+      }
+    }
+
+    // Try custom JWT auth
+    try {
+      await authenticateToken(req as any, res, () => {
+        const user = (req as any).user;
+        res.json({
+          id: user.id,
+          email: user.email,
+          subscriptionStatus: user.subscriptionStatus,
+          isAdmin: user.email === ADMIN_EMAIL
+        });
       });
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      res.status(401).json({ message: "Unauthorized" });
     }
   });
 

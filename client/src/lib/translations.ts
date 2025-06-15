@@ -309,6 +309,68 @@ export const translations = {
   anyType: {
     en: "Any Type",
     fr: "Tout Type"
+  },
+  
+  // Authentication forms
+  createAccount: {
+    en: "Create Account",
+    fr: "Créer un Compte"
+  },
+  joinMbendeStay: {
+    en: "Join MbendeStay to list and discover properties",
+    fr: "Rejoignez MbendeStay pour lister et découvrir des propriétés"
+  },
+  firstName: {
+    en: "First Name",
+    fr: "Prénom"
+  },
+  lastName: {
+    en: "Last Name",
+    fr: "Nom de Famille"
+  },
+  emailPlaceholder: {
+    en: "Enter your email",
+    fr: "Entrez votre email"
+  },
+  passwordPlaceholder: {
+    en: "Enter your password",
+    fr: "Entrez votre mot de passe"
+  },
+  confirmPassword: {
+    en: "Confirm Password",
+    fr: "Confirmer le Mot de Passe"
+  },
+  confirmPasswordPlaceholder: {
+    en: "Confirm your password",
+    fr: "Confirmez votre mot de passe"
+  },
+  alreadyHaveAccount: {
+    en: "Already have an account?",
+    fr: "Vous avez déjà un compte?"
+  },
+  noAccountYet: {
+    en: "Don't have an account?",
+    fr: "Vous n'avez pas de compte?"
+  },
+  or: {
+    en: "or",
+    fr: "ou"
+  },
+  continueWithReplit: {
+    en: "Continue with Replit",
+    fr: "Continuer avec Replit"
+  },
+  adminAccount: {
+    en: "Admin Account",
+    fr: "Compte Admin"
+  },
+  useReplitLogin: {
+    en: "Use 'Continue with Replit' button above",
+    fr: "Utilisez le bouton 'Continuer avec Replit' ci-dessus"
+  },
+  enterCredentials: {
+    en: "Enter your credentials to access your account",
+    fr: "Entrez vos identifiants pour accéder à votre compte"
   }
 };
 
