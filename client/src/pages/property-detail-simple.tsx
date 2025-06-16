@@ -262,7 +262,7 @@ export default function PropertyDetailSimple() {
                   className="w-full bg-secondary hover:bg-secondary/90 text-white"
                   onClick={() => {
                     if (!isAuthenticated) {
-                      window.location.href = "/api/login";
+                      setLocation(`/login?redirect=${encodeURIComponent(`/property/${propertyId}`)}`);
                       return;
                     }
                     contactMutation.mutate();

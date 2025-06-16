@@ -382,8 +382,8 @@ export default function PropertyDetail() {
                   <Button 
                     onClick={() => {
                       if (!user) {
-                        // Not logged in - redirect to login with return path
-                        setLocation(`/login?redirect=/property/${property.id}`);
+                        // Not logged in - redirect to custom login page with return path
+                        setLocation(`/login?redirect=${encodeURIComponent(`/property/${property.id}`)}`);
                         return;
                       }
                       

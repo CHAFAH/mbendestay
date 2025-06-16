@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/navigation";
@@ -42,6 +43,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 export default function LandlordRegistration() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [clientSecret, setClientSecret] = useState("");
   const [formData, setFormData] = useState({
@@ -84,7 +86,8 @@ export default function LandlordRegistration() {
         description: `MbendeStay ${subscriptionType === "landlord_yearly" ? "Yearly" : "Monthly"} Landlord Subscription`
       });
     },
-    onSuccess: (data) => {
+    onSuccess: async (response) => {
+      const data = await response.json();
       setClientSecret(data.clientSecret);
       setStep(4); // Move to payment step
     },
@@ -150,7 +153,7 @@ export default function LandlordRegistration() {
             Please log in to register as a landlord and start hosting on MbendeStay.
           </p>
           <Button 
-            onClick={() => window.location.href = "/api/login"}
+            onClick={() => setLocation("/login")}
             className="bg-primary hover:bg-primary/90 text-white"
           >
             Login to Continue
