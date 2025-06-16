@@ -18,6 +18,7 @@ import LandlordSubscribe from "@/pages/landlord-subscribe";
 import MessagesPage from "@/pages/messages";
 import ChatPage from "@/pages/chat";
 import Subscribe from "@/pages/subscribe";
+import PaymentSuccess from "@/pages/payment-success";
 import Profile from "@/pages/profile";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
@@ -34,6 +35,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/subscribe" component={Subscribe} />
+      <Route path="/payment-success" component={PaymentSuccess} />
       
       {!isAuthenticated && !isLoading ? (
         <>
