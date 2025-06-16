@@ -45,8 +45,12 @@ export const translations = {
     fr: "Messages"
   },
   dashboard: {
-    en: "Dashboard",
+    en: "Dashboard", 
     fr: "Tableau de bord"
+  },
+  profile: {
+    en: "Profile",
+    fr: "Profil"
   },
   login: {
     en: "Login",
