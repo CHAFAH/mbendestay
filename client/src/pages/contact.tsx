@@ -6,8 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 
 export default function Contact() {
+  useScrollToTop();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",

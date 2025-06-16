@@ -1,7 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Users, Shield, Globe, Heart, Award } from "lucide-react";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 
 export default function About() {
+  useScrollToTop();
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       {/* Hero Section */}

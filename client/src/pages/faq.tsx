@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HelpCircle, Search, Users, CreditCard, Shield, Home, Phone, Mail } from "lucide-react";
 import { useState } from "react";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 
 const faqData = [
   {
