@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Cookie, Calendar, Mail, Phone, Settings, Shield, BarChart, Target } from "lucide-react";
 import { useState } from "react";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import Navigation from "@/components/navigation";
+import Footer from "@/components/footer";
 
 const cookieCategories = [
   {
@@ -138,7 +140,9 @@ export default function Cookies() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       {/* Hero Section */}
       <div className="bg-primary text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

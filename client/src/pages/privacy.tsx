@@ -2,11 +2,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Shield, Calendar, Mail, Phone, Lock, Eye, Users, Database } from "lucide-react";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import Navigation from "@/components/navigation";
+import Footer from "@/components/footer";
 
 export default function Privacy() {
   useScrollToTop();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       {/* Hero Section */}
       <div className="bg-primary text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -378,6 +382,8 @@ export default function Privacy() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
