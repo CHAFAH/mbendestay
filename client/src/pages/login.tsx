@@ -189,7 +189,7 @@ export default function Login() {
             <div className="mt-6 text-center">
               <p className="text-sm text-neutral-600">
                 Don't have an account?{" "}
-                <Link href="/signup" className="text-blue-600 hover:underline">
+                <Link href={`/signup${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="text-blue-600 hover:underline">
                   Create account
                 </Link>
               </p>

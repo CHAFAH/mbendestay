@@ -70,17 +70,13 @@ export default function Signup() {
         description: "Please sign in to continue.",
       });
       
-      // Redirect to login with the original redirect parameter
-      if (redirectTo !== '/') {
-        setLocation(`/login?redirect=${encodeURIComponent(redirectTo)}`);
-      } else {
-        // Default behavior based on subscription type
-        if (variables.userType === "landlord" || variables.userType === "landlord_yearly") {
-          setLocation("/landlord-subscribe");
-        } else {
-          setLocation("/subscribe");
-        }
-      }
+      // Always redirect to login to complete authentication flow
+      // Pass redirect parameter so user gets back to original destination
+      const loginUrl = redirectTo !== '/' ? 
+        `/login?redirect=${encodeURIComponent(redirectTo)}` : 
+        '/login';
+      
+      setLocation(loginUrl);
     },
     onError: (error: Error) => {
       toast({

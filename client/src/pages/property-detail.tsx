@@ -380,7 +380,25 @@ export default function PropertyDetail() {
 
                 <div className="space-y-4 mb-6">
                   <Button 
-                    onClick={() => setShowInquiryForm(true)}
+                    onClick={() => {
+                      if (!user) {
+                        // Not logged in - redirect to login with return path
+                        setLocation(`/login?redirect=/property/${property.id}`);
+                        return;
+                      }
+                      
+                      // Check if user has active subscription
+                      const hasActiveSubscription = user?.subscriptionStatus === 'active' || user?.email === 'sani.ray.red@gmail.com';
+                      
+                      if (!hasActiveSubscription && user?.userType === 'renter') {
+                        // Renter without subscription - redirect to subscription
+                        setLocation('/subscribe');
+                        return;
+                      }
+                      
+                      // User is authenticated and has access - show inquiry form
+                      setShowInquiryForm(true);
+                    }}
                     className="w-full bg-secondary hover:bg-secondary/90 text-white"
                   >
                     Contact Landlord

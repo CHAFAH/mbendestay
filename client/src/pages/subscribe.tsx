@@ -22,6 +22,10 @@ export default function Subscribe() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, isLoading } = useAuth();
+  
+  // Get redirect parameter from URL or sessionStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectTo = urlParams.get('redirect') || sessionStorage.getItem('pendingRedirect') || '/';
 
   // Redirect non-renter users away from subscription page
   useEffect(() => {
@@ -66,7 +70,10 @@ export default function Subscribe() {
         title: "Subscription activated!",
         description: "You now have access to all property details.",
       });
-      setLocation("/");
+      
+      // Clear any stored redirect and go to original destination
+      sessionStorage.removeItem('pendingRedirect');
+      setLocation(redirectTo);
     },
     onError: (error: Error) => {
       toast({
