@@ -1,14 +1,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Users, Shield, Globe, Heart, Award } from "lucide-react";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import Navigation from "@/components/navigation";
+import Footer from "@/components/footer";
 
 export default function About() {
   useScrollToTop();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      {/* Hero Section */}
-      <div className="bg-primary text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        {/* Hero Section */}
+        <div className="bg-primary text-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-6">
               <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
@@ -227,6 +231,8 @@ export default function About() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
