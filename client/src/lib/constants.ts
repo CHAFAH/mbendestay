@@ -12,12 +12,26 @@ export const CAMEROON_REGIONS = [
 ];
 
 export const PROPERTY_TYPES = [
-  { value: "apartment", label: "Apartment" },
-  { value: "guestHouse", label: "Guest House" },
-  { value: "room", label: "Room" },
-  { value: "studio", label: "Studio" },
-  { value: "officeSpace", label: "Office Space" },
-  { value: "commercial", label: "Commercial" },
+  { value: "apartment", label: "Apartment", icon: "🏢", description: "Modern apartments in urban areas" },
+  { value: "guestHouse", label: "Guest House", icon: "🏡", description: "Private accommodations for visitors" },
+  { value: "room", label: "Room", icon: "🛏️", description: "Single rooms in shared accommodations" },
+  { value: "studio", label: "Studio", icon: "🏠", description: "Compact living spaces for singles" },
+  { value: "officeSpace", label: "Office Space", icon: "🏢", description: "Professional workspaces and offices" },
+  { value: "commercial", label: "Commercial", icon: "🏬", description: "Retail and business properties" },
+  { value: "house", label: "House", icon: "🏠", description: "Complete family homes with privacy" },
+  { value: "villa", label: "Villa", icon: "🏰", description: "Luxury homes with premium amenities" },
+  { value: "duplex", label: "Duplex", icon: "🏘️", description: "Two-story connected homes" },
+  { value: "penthouse", label: "Penthouse", icon: "🏙️", description: "Top-floor luxury apartments" },
+  { value: "townhouse", label: "Townhouse", icon: "🏘️", description: "Multi-story homes in residential complexes" },
+  { value: "bungalow", label: "Bungalow", icon: "🏡", description: "Single-story detached homes" },
+  { value: "cottage", label: "Cottage", icon: "🏞️", description: "Cozy homes in rural or suburban areas" },
+  { value: "chalet", label: "Chalet", icon: "🏔️", description: "Mountain or countryside retreats" },
+  { value: "loft", label: "Loft", icon: "🏗️", description: "Open-plan urban living spaces" },
+  { value: "hostel", label: "Hostel", icon: "🏨", description: "Budget-friendly shared accommodations" },
+  { value: "serviced_apartment", label: "Serviced Apartment", icon: "🏢", description: "Fully furnished with hotel-like services" },
+  { value: "compound", label: "Compound", icon: "🏘️", description: "Multiple buildings within gated areas" },
+  { value: "farm_house", label: "Farm House", icon: "🚜", description: "Rural properties with agricultural land" },
+  { value: "beach_house", label: "Beach House", icon: "🏖️", description: "Coastal properties near beaches" }
 ];
 
 export const CONTRACT_TYPES = [

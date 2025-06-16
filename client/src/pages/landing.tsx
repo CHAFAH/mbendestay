@@ -19,7 +19,7 @@ import {
   Search
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { SUBSCRIPTION_PLANS } from "@/lib/constants";
+import { SUBSCRIPTION_PLANS, PROPERTY_TYPES } from "@/lib/constants";
 import { useTranslation } from "@/lib/translations";
 import { REGIONS_DATA } from "@/lib/regions-data";
 
@@ -163,6 +163,47 @@ export default function Landing() {
             <Link href="/browse">
               <Button className="bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3 px-8">
                 {t('viewAllProperties')}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Property Types Showcase Section */}
+      <section className="py-16 bg-white">
+        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl md:text-4xl text-neutral-800 mb-4">
+              Discover Property Types Across Cameroon
+            </h2>
+            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+              From urban apartments to countryside chalets, find the perfect accommodation that suits your lifestyle and budget
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {PROPERTY_TYPES.map((propertyType) => (
+              <div key={propertyType.value} className="group cursor-pointer">
+                <div 
+                  className="bg-neutral-50 hover:bg-neutral-100 rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg border border-neutral-200 hover:border-primary/30"
+                  onClick={() => handleSearch({ propertyType: propertyType.value })}
+                >
+                  <div className="text-4xl mb-3">{propertyType.icon}</div>
+                  <h3 className="font-semibold text-neutral-800 mb-2 text-sm">
+                    {propertyType.label}
+                  </h3>
+                  <p className="text-xs text-neutral-600 leading-relaxed">
+                    {propertyType.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/browse">
+              <Button size="lg" className="px-8 bg-primary hover:bg-primary/90">
+                Browse All Property Types
               </Button>
             </Link>
           </div>
