@@ -261,58 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(401).json({ message: "Unauthorized" });
   };
 
-  // Subscription creation endpoint (protected by combined auth)
-  app.post('/api/subscription/create', authenticateUser, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const userEmail = req.user.email;
-      
-      // Check if admin - bypass subscription requirement
-      if (req.user.isAdmin || userEmail === ADMIN_EMAIL) {
-        return res.json({
-          message: 'Admin account - subscription not required',
-          user: {
-            id: userId,
-            email: userEmail,
-            subscriptionStatus: 'admin',
-            isAdmin: true
-          }
-        });
-      }
 
-      const validatedData = subscriptionSchema.parse(req.body);
-
-      // Calculate subscription end date
-      const now = new Date();
-      const subscriptionEndDate = new Date(now);
-      
-      if (validatedData.type === 'monthly') {
-        subscriptionEndDate.setMonth(now.getMonth() + 1);
-      } else if (validatedData.type === 'yearly') {
-        subscriptionEndDate.setFullYear(now.getFullYear() + 1);
-      }
-
-      // Update or create user with subscription
-      const updatedUser = await storage.upsertUser({
-        id: userId,
-        email: userEmail,
-        firstName: req.user.claims.first_name,
-        lastName: req.user.claims.last_name,
-        profileImageUrl: req.user.claims.profile_image_url,
-        subscriptionStatus: 'active',
-        subscriptionType: validatedData.type,
-        subscriptionExpiresAt: subscriptionEndDate,
-      });
-
-      res.json({
-        message: 'Subscription created successfully',
-        user: updatedUser
-      });
-    } catch (error: any) {
-      console.error("Error creating subscription:", error);
-      res.status(500).json({ message: "Failed to create subscription" });
-    }
-  });
 
   // Stripe payment intent endpoint
   app.post('/api/create-payment-intent', authenticateUser, async (req: any, res) => {
