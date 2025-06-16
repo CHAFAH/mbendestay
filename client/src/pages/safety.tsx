@@ -393,6 +393,8 @@ export default function Safety() {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }

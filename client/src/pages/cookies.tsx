@@ -444,6 +444,8 @@ export default function Cookies() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
