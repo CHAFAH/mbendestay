@@ -115,6 +115,7 @@ const specificCookies = [
 ];
 
 export default function Cookies() {
+  useScrollToTop();
   const [cookiePreferences, setCookiePreferences] = useState({
     essential: true,
     functional: true,

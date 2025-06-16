@@ -114,6 +114,7 @@ const quickActions = [
 ];
 
 export default function Help() {
+  useScrollToTop();
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
