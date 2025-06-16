@@ -84,6 +84,10 @@ export default function Login() {
           });
           setLocation(redirectTo);
         } else {
+          // Store the redirect destination for after subscription
+          if (redirectTo !== '/') {
+            sessionStorage.setItem('pendingRedirect', redirectTo);
+          }
           toast({
             title: "Welcome back!",
             description: "Subscribe to access property details and contact landlords.",
