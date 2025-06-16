@@ -312,6 +312,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Payment not successful" });
       }
 
+      // Create payment transaction record
+      await storage.createPaymentTransaction({
+        userId,
+        stripePaymentIntentId: paymentIntentId,
+        amount: paymentIntent.amount.toString(),
+        currency: paymentIntent.currency,
+        status: 'succeeded',
+        subscriptionType,
+        description: `MbendeStay ${subscriptionType} subscription`,
+        receiptUrl: paymentIntent.charges?.data[0]?.receipt_url || null,
+      });
+
       // Calculate subscription expiry date based on type
       const now = new Date();
       const subscriptionEndDate = new Date(now);
@@ -337,6 +349,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionExpiresAt: subscriptionEndDate,
       });
 
+      // Create or update subscription details
+      const existingDetails = await storage.getSubscriptionDetails(userId);
+      const subscriptionDetails = {
+        userId,
+        currentPlan: subscriptionType,
+        planPrice: paymentIntent.amount.toString(),
+        billingCycle: subscriptionType.includes('yearly') ? 'yearly' : 'monthly',
+        nextBillingDate: subscriptionEndDate,
+      };
+
+      if (existingDetails) {
+        await storage.updateSubscriptionDetails(userId, subscriptionDetails);
+      } else {
+        await storage.createSubscriptionDetails(subscriptionDetails);
+      }
+
       res.json({
         message: 'Subscription activated successfully',
         user: {
@@ -350,6 +378,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error processing payment success:", error);
       res.status(500).json({ message: "Failed to activate subscription" });
+    }
+  });
+
+  // Favorites endpoints
+  app.post('/api/favorites', authenticateUser, async (req: any, res) => {
+    try {
+      const { propertyId } = req.body;
+      const userId = req.user.id;
+
+      if (!propertyId) {
+        return res.status(400).json({ message: "Property ID is required" });
+      }
+
+      // Check if property exists
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      const favorite = await storage.addToFavorites(userId, propertyId);
+      res.json({ message: "Property added to favorites", favorite });
+    } catch (error: any) {
+      console.error("Error adding to favorites:", error);
+      res.status(500).json({ message: "Failed to add to favorites" });
+    }
+  });
+
+  app.delete('/api/favorites/:propertyId', authenticateUser, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.propertyId);
+      const userId = req.user.id;
+
+      await storage.removeFromFavorites(userId, propertyId);
+      res.json({ message: "Property removed from favorites" });
+    } catch (error: any) {
+      console.error("Error removing from favorites:", error);
+      res.status(500).json({ message: "Failed to remove from favorites" });
+    }
+  });
+
+  app.get('/api/favorites', authenticateUser, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const favorites = await storage.getUserFavorites(userId);
+      res.json(favorites);
+    } catch (error: any) {
+      console.error("Error fetching favorites:", error);
+      res.status(500).json({ message: "Failed to fetch favorites" });
+    }
+  });
+
+  app.get('/api/favorites/:propertyId/check', authenticateUser, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.propertyId);
+      const userId = req.user.id;
+      
+      const isFavorite = await storage.isFavorite(userId, propertyId);
+      res.json({ isFavorite });
+    } catch (error: any) {
+      console.error("Error checking favorite status:", error);
+      res.status(500).json({ message: "Failed to check favorite status" });
+    }
+  });
+
+  // Profile management endpoints
+  app.get('/api/profile/subscription', authenticateUser, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      const subscriptionDetails = await storage.getSubscriptionDetails(userId);
+      
+      res.json({
+        subscriptionStatus: user?.subscriptionStatus,
+        subscriptionType: user?.subscriptionType,
+        subscriptionExpiresAt: user?.subscriptionExpiresAt,
+        details: subscriptionDetails
+      });
+    } catch (error: any) {
+      console.error("Error fetching subscription details:", error);
+      res.status(500).json({ message: "Failed to fetch subscription details" });
+    }
+  });
+
+  app.get('/api/profile/transactions', authenticateUser, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const transactions = await storage.getPaymentTransactions(userId);
+      res.json(transactions);
+    } catch (error: any) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  app.delete('/api/profile/account', authenticateUser, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await storage.deleteUserAccount(userId);
+      res.json({ message: "Account deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
     }
   });
 

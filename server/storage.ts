@@ -7,6 +7,9 @@ import {
   reviews,
   conversations,
   messages,
+  favorites,
+  paymentTransactions,
+  subscriptionDetails,
   type User,
   type UpsertUser,
   type Property,
@@ -27,6 +30,14 @@ import {
   type Message,
   type MessageWithSender,
   type InsertMessage,
+  type Favorite,
+  type FavoriteWithProperty,
+  type InsertFavorite,
+  type PaymentTransaction,
+  type InsertPaymentTransaction,
+  type SubscriptionDetails,
+  type InsertSubscriptionDetails,
+  type UpdateSubscriptionDetails,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, ilike, inArray, desc, sql } from "drizzle-orm";
@@ -589,6 +600,138 @@ export class DatabaseStorage implements IStorage {
       );
 
     return result.count;
+  }
+
+  // Favorites operations
+  async addToFavorites(userId: string, propertyId: number): Promise<Favorite> {
+    const [favorite] = await db
+      .insert(favorites)
+      .values({ userId, propertyId })
+      .onConflictDoNothing()
+      .returning();
+    return favorite;
+  }
+
+  async removeFromFavorites(userId: string, propertyId: number): Promise<void> {
+    await db
+      .delete(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.propertyId, propertyId)));
+  }
+
+  async getUserFavorites(userId: string): Promise<FavoriteWithProperty[]> {
+    const result = await db
+      .select()
+      .from(favorites)
+      .innerJoin(properties, eq(favorites.propertyId, properties.id))
+      .innerJoin(users, eq(properties.landlordId, users.id))
+      .innerJoin(regions, eq(properties.regionId, regions.id))
+      .innerJoin(divisions, eq(properties.divisionId, divisions.id))
+      .where(eq(favorites.userId, userId))
+      .orderBy(desc(favorites.createdAt));
+
+    return result.map(row => ({
+      ...row.favorites,
+      property: {
+        ...row.properties,
+        landlord: row.users,
+        region: row.regions,
+        division: row.divisions,
+      }
+    }));
+  }
+
+  async isFavorite(userId: string, propertyId: number): Promise<boolean> {
+    const [result] = await db
+      .select()
+      .from(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.propertyId, propertyId)))
+      .limit(1);
+    
+    return !!result;
+  }
+
+  // Payment and subscription operations
+  async createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction> {
+    const [result] = await db
+      .insert(paymentTransactions)
+      .values(transaction)
+      .returning();
+    return result;
+  }
+
+  async updatePaymentTransaction(id: number, updates: Partial<PaymentTransaction>): Promise<PaymentTransaction> {
+    const [result] = await db
+      .update(paymentTransactions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(paymentTransactions.id, id))
+      .returning();
+    return result;
+  }
+
+  async getPaymentTransactions(userId: string): Promise<PaymentTransaction[]> {
+    return await db
+      .select()
+      .from(paymentTransactions)
+      .where(eq(paymentTransactions.userId, userId))
+      .orderBy(desc(paymentTransactions.createdAt));
+  }
+
+  async getPaymentTransaction(paymentIntentId: string): Promise<PaymentTransaction | undefined> {
+    const [result] = await db
+      .select()
+      .from(paymentTransactions)
+      .where(eq(paymentTransactions.stripePaymentIntentId, paymentIntentId))
+      .limit(1);
+    return result;
+  }
+
+  // Subscription details operations
+  async createSubscriptionDetails(details: InsertSubscriptionDetails): Promise<SubscriptionDetails> {
+    const [result] = await db
+      .insert(subscriptionDetails)
+      .values(details)
+      .returning();
+    return result;
+  }
+
+  async updateSubscriptionDetails(userId: string, updates: UpdateSubscriptionDetails): Promise<SubscriptionDetails> {
+    const [result] = await db
+      .update(subscriptionDetails)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(subscriptionDetails.userId, userId))
+      .returning();
+    return result;
+  }
+
+  async getSubscriptionDetails(userId: string): Promise<SubscriptionDetails | undefined> {
+    const [result] = await db
+      .select()
+      .from(subscriptionDetails)
+      .where(eq(subscriptionDetails.userId, userId))
+      .limit(1);
+    return result;
+  }
+
+  async deleteSubscriptionDetails(userId: string): Promise<void> {
+    await db
+      .delete(subscriptionDetails)
+      .where(eq(subscriptionDetails.userId, userId));
+  }
+
+  // Profile operations
+  async deleteUserAccount(userId: string): Promise<void> {
+    // Delete in correct order to maintain referential integrity
+    await db.delete(favorites).where(eq(favorites.userId, userId));
+    await db.delete(paymentTransactions).where(eq(paymentTransactions.userId, userId));
+    await db.delete(subscriptionDetails).where(eq(subscriptionDetails.userId, userId));
+    await db.delete(messages).where(eq(messages.senderId, userId));
+    await db.delete(conversations).where(
+      sql`${conversations.landlordId} = ${userId} OR ${conversations.renterId} = ${userId}`
+    );
+    await db.delete(reviews).where(eq(reviews.reviewerId, userId));
+    await db.delete(inquiries).where(eq(inquiries.guestEmail, userId));
+    await db.delete(properties).where(eq(properties.landlordId, userId));
+    await db.delete(users).where(eq(users.id, userId));
   }
 }
 
