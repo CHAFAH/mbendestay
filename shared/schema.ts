@@ -144,13 +144,84 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Favorites table for user's favorite properties
+export const favorites = pgTable("favorites", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  propertyId: integer("property_id").notNull().references(() => properties.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueUserProperty: unique().on(table.userId, table.propertyId),
+}));
+
+// Payment transactions for receipts and transaction history
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id").unique(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("xaf"),
+  status: varchar("status").notNull(), // "pending", "succeeded", "failed"
+  subscriptionType: varchar("subscription_type"), // "renter_monthly", "landlord_monthly", "landlord_yearly"
+  description: text("description"),
+  receiptUrl: varchar("receipt_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Subscription details for billing management
+export const subscriptionDetails = pgTable("subscription_details", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  currentPlan: varchar("current_plan"), // "renter_monthly", "landlord_monthly", "landlord_yearly"
+  planPrice: decimal("plan_price", { precision: 10, scale: 2 }),
+  billingCycle: varchar("billing_cycle"), // "monthly", "yearly"
+  nextBillingDate: timestamp("next_billing_date"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+  paymentMethodId: varchar("payment_method_id"),
+  paymentMethodBrand: varchar("payment_method_brand"), // "visa", "mastercard", etc.
+  paymentMethodLast4: varchar("payment_method_last4"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   properties: many(properties),
   reviews: many(reviews),
+  favorites: many(favorites),
+  paymentTransactions: many(paymentTransactions),
+  subscriptionDetails: one(subscriptionDetails),
   landlordConversations: many(conversations, { relationName: "landlordConversations" }),
   renterConversations: many(conversations, { relationName: "renterConversations" }),
   sentMessages: many(messages),
+}));
+
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+  user: one(users, {
+    fields: [favorites.userId],
+    references: [users.id],
+  }),
+  property: one(properties, {
+    fields: [favorites.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const paymentTransactionsRelations = relations(paymentTransactions, ({ one }) => ({
+  user: one(users, {
+    fields: [paymentTransactions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const subscriptionDetailsRelations = relations(subscriptionDetails, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptionDetails.userId],
+    references: [users.id],
+  }),
 }));
 
 export const regionsRelations = relations(regions, ({ many }) => ({
@@ -348,4 +419,23 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
 export type MessageWithSender = Message & {
   sender: User;
+};
+
+// New table types
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = typeof favorites.$inferInsert;
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = typeof paymentTransactions.$inferInsert;
+export type SubscriptionDetails = typeof subscriptionDetails.$inferSelect;
+export type InsertSubscriptionDetails = typeof subscriptionDetails.$inferInsert;
+export type UpdateSubscriptionDetails = Partial<InsertSubscriptionDetails>;
+
+// Extended types with relations
+export type FavoriteWithProperty = Favorite & {
+  property: PropertyWithDetails;
+};
+
+export type UserWithSubscriptionDetails = User & {
+  subscriptionDetails?: SubscriptionDetails;
+  paymentTransactions?: PaymentTransaction[];
 };

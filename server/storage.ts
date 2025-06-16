@@ -71,6 +71,27 @@ export interface IStorage {
   getMessagesByConversation(conversationId: number): Promise<MessageWithSender[]>;
   markMessagesAsRead(conversationId: number, userId: string): Promise<void>;
   getUnreadMessageCount(userId: string): Promise<number>;
+
+  // Favorites operations
+  addToFavorites(userId: string, propertyId: number): Promise<Favorite>;
+  removeFromFavorites(userId: string, propertyId: number): Promise<void>;
+  getUserFavorites(userId: string): Promise<FavoriteWithProperty[]>;
+  isFavorite(userId: string, propertyId: number): Promise<boolean>;
+
+  // Payment and subscription operations
+  createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
+  updatePaymentTransaction(id: number, updates: Partial<PaymentTransaction>): Promise<PaymentTransaction>;
+  getPaymentTransactions(userId: string): Promise<PaymentTransaction[]>;
+  getPaymentTransaction(paymentIntentId: string): Promise<PaymentTransaction | undefined>;
+  
+  // Subscription details operations
+  createSubscriptionDetails(details: InsertSubscriptionDetails): Promise<SubscriptionDetails>;
+  updateSubscriptionDetails(userId: string, updates: UpdateSubscriptionDetails): Promise<SubscriptionDetails>;
+  getSubscriptionDetails(userId: string): Promise<SubscriptionDetails | undefined>;
+  deleteSubscriptionDetails(userId: string): Promise<void>;
+
+  // Profile operations
+  deleteUserAccount(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
