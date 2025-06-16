@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Cookie, Calendar, Mail, Phone, Settings, Shield, BarChart, Target } from "lucide-react";
 import { useState } from "react";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 
 const cookieCategories = [
   {

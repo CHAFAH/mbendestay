@@ -129,6 +129,7 @@ const faqData = [
 ];
 
 export default function FAQ() {
+  useScrollToTop();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 

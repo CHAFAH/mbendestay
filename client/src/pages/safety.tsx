@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 import { 
   Shield, 
   AlertTriangle, 
@@ -153,6 +154,7 @@ const emergencyContacts = [
 ];
 
 export default function Safety() {
+  useScrollToTop();
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       {/* Hero Section */}
