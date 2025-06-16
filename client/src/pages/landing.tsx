@@ -29,7 +29,7 @@ export default function Landing() {
   const { t } = useTranslation(language);
 
   const { data: featuredProperties } = useQuery({
-    queryKey: ["/api/properties", { limit: 6 }],
+    queryKey: ["/api/properties", { limit: 15 }],
   });
 
   const { data: regions = [] } = useQuery({
