@@ -38,7 +38,7 @@ export default function FavoriteButton({ propertyId, className = "", size = "md"
     onSuccess: () => {
       // Invalidate queries to refresh favorite status
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites", propertyId, "check"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${propertyId}/check`] });
       
       toast({
         title: isFavorited ? "Removed from favorites" : "Added to favorites",
