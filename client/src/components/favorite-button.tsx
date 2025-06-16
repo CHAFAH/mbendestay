@@ -25,7 +25,7 @@ export default function FavoriteButton({ propertyId, className = "", size = "md"
     retry: false,
   });
 
-  const isFavorited = favoriteData?.isFavorite || false;
+  const isFavorited = (favoriteData as { isFavorite?: boolean })?.isFavorite || false;
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {

@@ -56,6 +56,40 @@ export default function Profile() {
     retry: false,
   });
 
+  // Type cast for API responses
+  const typedSubscriptionData = subscriptionData as {
+    subscriptionStatus?: string;
+    subscriptionType?: string;
+    subscriptionExpiresAt?: string;
+    details?: {
+      currentPlan?: string;
+      planPrice?: string;
+      billingCycle?: string;
+      nextBillingDate?: string;
+    };
+  } | undefined;
+
+  const typedFavorites = favorites as Array<{
+    id: number;
+    property: {
+      id: number;
+      title: string;
+      price: string;
+      images: string[];
+      region: { name: string };
+      division: { name: string };
+    };
+  }>;
+
+  const typedTransactions = transactions as Array<{
+    id: number;
+    description: string;
+    amount: string;
+    status: string;
+    createdAt: string;
+    receiptUrl?: string;
+  }>;
+
   // Delete account mutation
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
@@ -119,11 +153,11 @@ export default function Profile() {
   };
 
   const getSubscriptionStatus = () => {
-    if (!subscriptionData?.subscriptionStatus) return 'inactive';
-    if (subscriptionData.subscriptionExpiresAt) {
-      return new Date(subscriptionData.subscriptionExpiresAt) > new Date() ? 'active' : 'expired';
+    if (!typedSubscriptionData?.subscriptionStatus) return 'inactive';
+    if (typedSubscriptionData.subscriptionExpiresAt) {
+      return new Date(typedSubscriptionData.subscriptionExpiresAt) > new Date() ? 'active' : 'expired';
     }
-    return subscriptionData.subscriptionStatus;
+    return typedSubscriptionData.subscriptionStatus;
   };
 
   const subscriptionStatus = getSubscriptionStatus();
@@ -227,20 +261,20 @@ export default function Profile() {
                       }
                     </Badge>
                   </div>
-                  {subscriptionData?.subscriptionType && (
+                  {typedSubscriptionData?.subscriptionType && (
                     <div>
                       <p className="text-sm font-medium text-gray-500">
                         {language === 'fr' ? 'Plan' : 'Plan'}
                       </p>
-                      <p className="text-lg capitalize">{subscriptionData.subscriptionType.replace('_', ' ')}</p>
+                      <p className="text-lg capitalize">{typedSubscriptionData.subscriptionType.replace('_', ' ')}</p>
                     </div>
                   )}
-                  {subscriptionData?.subscriptionExpiresAt && (
+                  {typedSubscriptionData?.subscriptionExpiresAt && (
                     <div>
                       <p className="text-sm font-medium text-gray-500">
                         {language === 'fr' ? 'Expire le' : 'Expires On'}
                       </p>
-                      <p className="text-lg">{formatDate(subscriptionData.subscriptionExpiresAt)}</p>
+                      <p className="text-lg">{formatDate(typedSubscriptionData.subscriptionExpiresAt)}</p>
                     </div>
                   )}
                   {subscriptionStatus !== 'active' && (
@@ -276,7 +310,7 @@ export default function Profile() {
                   <div className="flex justify-center py-8">
                     <div className="animate-spin w-6 h-6 border-4 border-primary border-t-transparent rounded-full" />
                   </div>
-                ) : favorites.length === 0 ? (
+                ) : typedFavorites.length === 0 ? (
                   <div className="text-center py-8">
                     <Heart className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-500">
@@ -292,7 +326,7 @@ export default function Profile() {
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {favorites.map((favorite: any) => (
+                    {typedFavorites.map((favorite) => (
                       <Card key={favorite.id} className="overflow-hidden">
                         <div className="aspect-video bg-gray-200 relative">
                           {favorite.property.images && favorite.property.images.length > 0 ? (
@@ -345,34 +379,34 @@ export default function Profile() {
                   <div className="flex justify-center py-8">
                     <div className="animate-spin w-6 h-6 border-4 border-primary border-t-transparent rounded-full" />
                   </div>
-                ) : subscriptionData?.details ? (
+                ) : typedSubscriptionData?.details ? (
                   <div className="space-y-4">
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
                         <p className="text-sm font-medium text-gray-500">
                           {language === 'fr' ? 'Plan actuel' : 'Current Plan'}
                         </p>
-                        <p className="text-lg capitalize">{subscriptionData.details.currentPlan?.replace('_', ' ')}</p>
+                        <p className="text-lg capitalize">{typedSubscriptionData.details.currentPlan?.replace('_', ' ')}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">
                           {language === 'fr' ? 'Prix du plan' : 'Plan Price'}
                         </p>
-                        <p className="text-lg">{formatCurrency(subscriptionData.details.planPrice || '0')}</p>
+                        <p className="text-lg">{formatCurrency(typedSubscriptionData.details.planPrice || '0')}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">
                           {language === 'fr' ? 'Cycle de facturation' : 'Billing Cycle'}
                         </p>
-                        <p className="text-lg capitalize">{subscriptionData.details.billingCycle}</p>
+                        <p className="text-lg capitalize">{typedSubscriptionData.details.billingCycle}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">
                           {language === 'fr' ? 'Prochaine facturation' : 'Next Billing Date'}
                         </p>
                         <p className="text-lg">
-                          {subscriptionData.details.nextBillingDate 
-                            ? formatDate(subscriptionData.details.nextBillingDate)
+                          {typedSubscriptionData.details.nextBillingDate 
+                            ? formatDate(typedSubscriptionData.details.nextBillingDate)
                             : 'N/A'
                           }
                         </p>

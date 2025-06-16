@@ -26,6 +26,7 @@ export default function Navigation() {
     { path: "/browse", label: t('browse'), icon: Search, public: true },
     { path: "/messages", label: t('messages'), icon: MessageCircle, public: false },
     { path: "/dashboard", label: t('dashboard'), icon: Building, public: false },
+    { path: "/profile", label: t('profile'), icon: User, public: false },
   ];
 
   return (
