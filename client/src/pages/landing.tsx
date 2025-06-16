@@ -147,7 +147,7 @@ export default function Landing() {
 
           {(featuredProperties as any)?.properties && (featuredProperties as any).properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
-              {(featuredProperties as any).properties.slice(0, 10).map((property: any) => (
+              {(featuredProperties as any).properties.slice(0, 15).map((property: any) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>
