@@ -279,7 +279,7 @@ export default function Profile() {
                   )}
                   {subscriptionStatus !== 'active' && (
                     <div className="pt-4">
-                      <Link href="/subscribe">
+                      <Link href={user?.userType === 'landlord' ? '/landlord-subscribe' : '/subscribe'}>
                         <Button className="w-full">
                           {language === 'fr' ? 'S\'abonner maintenant' : 'Subscribe Now'}
                         </Button>

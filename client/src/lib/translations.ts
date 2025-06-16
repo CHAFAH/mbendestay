@@ -60,10 +60,6 @@ export const translations = {
     en: "Logout",
     fr: "Déconnexion"
   },
-  profile: {
-    en: "Profile",
-    fr: "Profil"
-  },
   admin: {
     en: "Admin",
     fr: "Admin"

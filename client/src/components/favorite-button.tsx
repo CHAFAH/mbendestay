@@ -20,7 +20,7 @@ export default function FavoriteButton({ propertyId, className = "", size = "md"
 
   // Check if property is favorited
   const { data: favoriteData } = useQuery({
-    queryKey: ["/api/favorites", propertyId, "check"],
+    queryKey: [`/api/favorites/${propertyId}/check`],
     enabled: isAuthenticated,
     retry: false,
   });

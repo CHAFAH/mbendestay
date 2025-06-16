@@ -5,6 +5,7 @@ import { Heart, Star, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { PropertyWithDetails } from "@shared/schema";
+import FavoriteButton from "./favorite-button";
 
 interface PropertyCardProps {
   property: PropertyWithDetails;
@@ -96,9 +97,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </Badge>
         </div>
         
-        <button className="absolute top-4 right-4 bg-white/90 hover:bg-white text-neutral-700 p-2 rounded-full transition-colors">
-          <Heart className="w-4 h-4" />
-        </button>
+        <div className="absolute top-4 right-4">
+          <FavoriteButton propertyId={property.id} className="bg-white/90 hover:bg-white" />
+        </div>
       </div>
       
       <CardContent className="p-6">
