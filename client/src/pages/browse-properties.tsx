@@ -34,63 +34,8 @@ export default function BrowseProperties() {
     page: 1,
   });
 
-  // Check if user has active renter subscription or is admin
+  // Check if user has active subscription for accessing contact details
   const hasActiveSubscription = user?.subscriptionStatus === 'active' || user?.email === 'sani.ray.red@gmail.com';
-  
-  // Show subscription required message if not authenticated or no subscription
-  if (!authLoading && (!isAuthenticated || !hasActiveSubscription)) {
-    return (
-      <div className="min-h-screen bg-neutral-50">
-        <Navigation />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <Lock className="w-16 h-16 text-amber-500 mx-auto mb-6" />
-            <h1 className="font-bold text-3xl text-neutral-800 mb-4">
-              Subscription Required
-            </h1>
-            <p className="text-lg text-neutral-600 mb-6">
-              To browse properties, you need an active renter subscription.
-            </p>
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-auto mb-8 shadow-lg">
-              <Search className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <h3 className="font-bold text-xl mb-2">Renter Subscription</h3>
-              <div className="text-3xl font-bold text-green-600 mb-2">10,000 FCFA</div>
-              <p className="text-neutral-600 mb-4">Per month</p>
-              <ul className="text-left space-y-2 text-sm mb-6">
-                {SUBSCRIPTION_PLANS.renter_monthly.features.en.map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-4">
-              {!isAuthenticated ? (
-                <div className="space-y-3">
-                  <Link href="/login?redirect=/browse">
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-3">
-                      Login to Subscribe
-                    </Button>
-                  </Link>
-                  <p className="text-sm text-neutral-600">
-                    Don't have an account? <Link href="/signup?redirect=/browse" className="text-green-600 hover:underline">Sign up here</Link>
-                  </p>
-                </div>
-              ) : (
-                <Link href="/subscribe">
-                  <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3">
-                    Subscribe Now
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   // Parse URL parameters on mount
   useEffect(() => {
@@ -151,51 +96,73 @@ export default function BrowseProperties() {
     });
   };
 
-  const totalPages = total ? Math.ceil(total / 12) : 0;
+  const totalPages = Math.ceil(total / 10);
 
   return (
     <div className="min-h-screen bg-neutral-50">
       <Navigation />
       
       {/* Header */}
-      <section className="py-8 bg-white border-b border-neutral-200">
-        <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="font-bold text-3xl text-neutral-800">Browse Properties</h1>
-              <p className="text-neutral-600 mt-2">
-                {total} properties found
-              </p>
-            </div>
-            
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden"
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
-          </div>
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="font-bold text-3xl text-neutral-800 mb-4">
+            Browse Properties
+          </h1>
+          <p className="text-lg text-neutral-600 mb-6">
+            Discover amazing accommodations across Cameroon
+          </p>
           
+          {/* Search Form */}
           <SearchForm onSearch={handleSearch} />
+          
+          {/* Subscription Notice for non-subscribed users */}
+          {!hasActiveSubscription && (
+            <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-start">
+                <Lock className="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-amber-800 mb-1">
+                    Limited Access
+                  </h3>
+                  <p className="text-amber-700 text-sm mb-3">
+                    You can browse properties and view details, but need a subscription to access landlord contact information and exact addresses.
+                  </p>
+                  <Link href="/subscribe">
+                    <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                      Subscribe for Full Access
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </section>
+      </div>
 
-      <div className="w-full px-6 lg:px-12 xl:px-16 2xl:px-20 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="lg:grid lg:grid-cols-4 lg:gap-8">
           {/* Filters Sidebar */}
-          <div className={`lg:w-80 xl:w-96 space-y-6 ${showFilters || 'hidden lg:block'}`}>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+          <div className="lg:col-span-1">
+            <div className="flex items-center justify-between lg:hidden mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
+            </div>
+
+            <Card className={`${showFilters ? 'block' : 'hidden'} lg:block`}>
+              <CardContent className="p-6 space-y-6">
+                <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-lg">Filters</h3>
-                  <div className="flex space-x-2">
+                  <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={clearFilters}
-                      className="text-sm"
                     >
                       Clear All
                     </Button>
@@ -316,7 +283,13 @@ export default function BrowseProperties() {
           </div>
 
           {/* Properties Grid */}
-          <div className="flex-1">
+          <div className="lg:col-span-3 mt-6 lg:mt-0">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-neutral-600">
+                {total > 0 ? `${total} properties found` : 'No properties found'}
+              </p>
+            </div>
+
             {propertiesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => (
