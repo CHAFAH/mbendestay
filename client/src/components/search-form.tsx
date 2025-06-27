@@ -20,7 +20,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
   const { language } = useLanguage();
   const { t } = useTranslation(language);
   const [region, setRegion] = useState("");
-  const [division, setDivision] = useState("");
+  const [division, setDivision] = useState("all");
   const [propertyType, setPropertyType] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -39,7 +39,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
 
   // Reset division when region changes
   useEffect(() => {
-    setDivision("");
+    setDivision("all");
   }, [region]);
 
   const handleSubmit = (e: React.FormEvent) => {
