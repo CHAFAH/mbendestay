@@ -97,7 +97,7 @@ export default function SearchForm({ onSearch, className = "" }: SearchFormProps
             <SelectContent className="max-h-60 overflow-y-auto">
               <SelectItem value="all">{t('allDivisions')}</SelectItem>
               {(divisions as any[]).map((d: any) => (
-                <SelectItem key={d.id} value={d.slug}>
+                <SelectItem key={d.id} value={d.id.toString()}>
                   {d.name}
                 </SelectItem>
               ))}

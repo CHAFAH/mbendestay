@@ -511,6 +511,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Handle amenities parameter conversion from string to array
       const query: any = { ...req.query };
+      console.log("Properties API - Raw query params:", query);
+      
       if (query.amenities) {
         if (typeof query.amenities === 'string') {
           if (query.amenities.trim() === '') {
@@ -535,7 +537,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const filters = searchPropertiesSchema.parse(query);
+      console.log("Properties API - Parsed filters:", filters);
+      
       const result = await storage.getProperties(filters);
+      console.log("Properties API - Result count:", result.properties.length, "Total:", result.total);
+      
       res.json(result);
     } catch (error) {
       console.error("Error searching properties:", error);

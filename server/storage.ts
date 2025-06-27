@@ -173,30 +173,39 @@ export class DatabaseStorage implements IStorage {
 
   // Property operations
   async getProperties(filters: SearchProperties): Promise<{ properties: PropertyWithDetails[]; total: number }> {
+    console.log("Storage - getProperties called with filters:", filters);
     const conditions = [eq(properties.isActive, true)];
 
     if (filters.regionId) {
+      console.log("Storage - Adding regionId filter:", filters.regionId);
       conditions.push(eq(properties.regionId, filters.regionId));
     }
     if (filters.divisionId) {
+      console.log("Storage - Adding divisionId filter:", filters.divisionId);
       conditions.push(eq(properties.divisionId, filters.divisionId));
     }
     if (filters.propertyType && filters.propertyType !== "all" && filters.propertyType !== "") {
+      console.log("Storage - Adding propertyType filter:", filters.propertyType);
       conditions.push(eq(properties.propertyType, filters.propertyType));
     }
     if (filters.contractType && filters.contractType !== "all" && filters.contractType !== "") {
+      console.log("Storage - Adding contractType filter:", filters.contractType);
       conditions.push(eq(properties.contractType, filters.contractType));
     }
     if (filters.rooms && filters.rooms !== 0) {
+      console.log("Storage - Adding rooms filter:", filters.rooms);
       conditions.push(eq(properties.rooms, filters.rooms));
     }
     if (filters.minPrice && filters.minPrice > 0) {
+      console.log("Storage - Adding minPrice filter:", filters.minPrice);
       conditions.push(sql`${properties.pricePerMonth}::numeric >= ${filters.minPrice}`);
     }
     if (filters.maxPrice && filters.maxPrice > 0) {
+      console.log("Storage - Adding maxPrice filter:", filters.maxPrice);
       conditions.push(sql`${properties.pricePerMonth}::numeric <= ${filters.maxPrice}`);
     }
 
+    console.log("Storage - Total conditions:", conditions.length);
     const offset = (filters.page - 1) * filters.limit;
 
     const [propertiesResult, [countResult]] = await Promise.all([
