@@ -8,11 +8,12 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.0-06B6D4?logo=tailwindcss&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**MbendeStay** is a full-stack, Airbnb-inspired rental platform designed specifically for the Cameroonian market. It connects landlords with potential tenants through a modern, intuitive interface featuring advanced search, robust filtering, and a seamless user experience.
+**MbendeStay** is a full-stack, Airbnb-inspired rental platform designed specifically for the Cameroonian market. It connects landlords with potential tenants through a modern, intuitive interface featuring advanced search, robust filtering, and a seamless user experience. 
 
 **Live Demo:** [https://mbendestay.com](https://mbendestay.com) *(Note: Replace with your actual deployment URL)*
 
-![MbendeStay Platform Screenshot](https://via.placeholder.com/800x400/3B82F6/FFFFFF?text=MbendeStay+Platform+Showcase) *(Note: Add a real screenshot of your app here)*
+<img width="1667" height="824" alt="image" src="https://github.com/user-attachments/assets/265b405c-45dd-4023-a515-da67b4029451" />
+
 
 ##  Features
 
