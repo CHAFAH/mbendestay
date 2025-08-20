@@ -10,8 +10,6 @@
 
 **MbendeStay** is a full-stack, Airbnb-inspired rental platform designed specifically for the Cameroonian market. It connects landlords with potential tenants through a modern, intuitive interface featuring advanced search, robust filtering, and a seamless user experience. 
 
-**Live Demo:** [https://mbendestay.com](https://mbendestay.com) *(Note: Replace with your actual deployment URL)*
-
 <img width="1667" height="824" alt="image" src="https://github.com/user-attachments/assets/265b405c-45dd-4023-a515-da67b4029451" />
 
 
