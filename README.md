@@ -181,11 +181,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Vite team for the fantastic build tool
 - Drizzle ORM for type-safe database interactions
 
+Absolutely. Here is the contact section formatted exactly like the previous one, tailored for your MbendeStay project.
+
+---
+
 ## 📞 Contact
 
-Sani Chafah - [@sani_chafah](https://twitter.com/sani_chafah) - [LinkedIn](https://www.linkedin.com/in/sani-chafah/)
+Sani Chafah - [sani.chafah@email.com](mailto:ps@nebulancesystems.com)
 
-Project Link: [https://github.com/CHAFAH/mbendestay](https://github.com/CHAFAH/mbendestay)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sani-chafah/)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?logo=github&logoColor=white)](https://github.com/CHAFAH)
+**Project Link:** [https://github.com/CHAFAH/mbendestay](https://github.com/CHAFAH/mbendestay)
+
 
 ---
 
