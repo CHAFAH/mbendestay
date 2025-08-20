@@ -187,7 +187,7 @@ Absolutely. Here is the contact section formatted exactly like the previous one,
 
 ## 📞 Contact
 
-Sani Chafah - [sani.chafah@email.com](mailto:ps@nebulancesystems.com)
+Sani Chafah - [prsan@nebulancesystems.com](mailto:prsan@nebulancesystems.com)
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sani-chafah/)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-black?logo=github&logoColor=white)](https://github.com/CHAFAH)
